@@ -1,0 +1,221 @@
+import React, { useState, useEffect } from 'react';
+import { X, Check, AlertCircle } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+
+export default function EggPriceModal({ isOpen, onClose, currentPrice, onSavePrice }) {
+  const { t } = useLanguage();
+  const [eggPrice, setEggPrice] = useState('1.35');
+  const [plateauPrice, setPlateauPrice] = useState('40.50');
+  const [updateAllClients, setUpdateAllClients] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      const p = currentPrice || 1.35;
+      setEggPrice(p.toFixed(2));
+      setPlateauPrice((p * 30).toFixed(2));
+      setUpdateAllClients(true);
+      setError('');
+    }
+  }, [isOpen, currentPrice]);
+
+  if (!isOpen) return null;
+
+  const handleEggPriceChange = (val) => {
+    setEggPrice(val);
+    const num = parseFloat(val);
+    if (!isNaN(num) && num > 0) {
+      setPlateauPrice((num * 30).toFixed(2));
+      setError('');
+    }
+  };
+
+  const handlePlateauPriceChange = (val) => {
+    setPlateauPrice(val);
+    const num = parseFloat(val);
+    if (!isNaN(num) && num > 0) {
+      setEggPrice((num / 30).toFixed(2));
+      setError('');
+    }
+  };
+
+  const adjustPrice = (delta) => {
+    const current = parseFloat(eggPrice) || 1.35;
+    const next = Math.max(0.10, Math.round((current + delta) * 100) / 100);
+    setEggPrice(next.toFixed(2));
+    setPlateauPrice((next * 30).toFixed(2));
+    setError('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const finalPrice = parseFloat(eggPrice);
+    if (isNaN(finalPrice) || finalPrice <= 0) {
+      setError(t('error'));
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await onSavePrice({
+        price: finalPrice,
+        update_all_clients: updateAllClients
+      });
+      onClose();
+    } catch (err) {
+      setError(err.message || t('error'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[92vh] transition-colors">
+        {/* En-tête */}
+        <div className="p-4 bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-600 dark:to-slate-800 text-white flex items-center justify-between">
+          <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
+            <div className="p-2 bg-white/20 rounded-2xl">
+              <span className="text-xl">🥚</span>
+            </div>
+            <div>
+              <h3 className="text-base font-black leading-tight">{t('eggPriceModalTitle')}</h3>
+              <p className="text-xs text-amber-100 dark:text-slate-300 font-medium">{t('eggPriceModalSubtitle')}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-full hover:bg-white/20 active:scale-95 transition text-white"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Formulaire */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto">
+          {error && (
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-2xl flex items-center space-x-2 rtl:space-x-reverse text-rose-700 dark:text-rose-400 text-xs font-bold">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Saisie Prix unitaire et plateau */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Prix par œuf */}
+            <div className="bg-amber-50/70 dark:bg-slate-800/80 p-3 rounded-2xl border-2 border-amber-300 dark:border-slate-700">
+              <label className="block text-[11px] font-black text-amber-950 dark:text-amber-300 uppercase tracking-wider mb-1">
+                {t('unitPriceInputLabel')}
+              </label>
+              <div className="flex items-center space-x-1 rtl:space-x-reverse">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.10"
+                  value={eggPrice}
+                  onChange={(e) => handleEggPriceChange(e.target.value)}
+                  className="w-full text-2xl font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 py-1.5 px-2 rounded-xl border border-amber-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  placeholder="1.35"
+                  required
+                />
+                <span className="text-xs font-black text-amber-900 dark:text-amber-400 shrink-0">{t('dh')}</span>
+              </div>
+            </div>
+
+            {/* Prix par plateau */}
+            <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <label className="block text-[11px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                {t('plateauPriceInputLabel')}
+              </label>
+              <div className="flex items-center space-x-1 rtl:space-x-reverse">
+                <input
+                  type="number"
+                  step="0.10"
+                  min="3.00"
+                  value={plateauPrice}
+                  onChange={(e) => handlePlateauPriceChange(e.target.value)}
+                  className="w-full text-2xl font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 py-1.5 px-2 rounded-xl border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  placeholder="40.50"
+                  required
+                />
+                <span className="text-xs font-black text-slate-600 dark:text-slate-400 shrink-0">{t('dh')}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Raccourcis d'ajustement rapide */}
+          <div>
+            <div className="grid grid-cols-4 gap-1.5">
+              <button
+                type="button"
+                onClick={() => adjustPrice(-0.10)}
+                className="py-1.5 text-xs font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition active:scale-95"
+              >
+                - 0.10
+              </button>
+              <button
+                type="button"
+                onClick={() => adjustPrice(-0.05)}
+                className="py-1.5 text-xs font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition active:scale-95"
+              >
+                - 0.05
+              </button>
+              <button
+                type="button"
+                onClick={() => adjustPrice(+0.05)}
+                className="py-1.5 text-xs font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition active:scale-95"
+              >
+                + 0.05
+              </button>
+              <button
+                type="button"
+                onClick={() => adjustPrice(+0.10)}
+                className="py-1.5 text-xs font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition active:scale-95"
+              >
+                + 0.10
+              </button>
+            </div>
+          </div>
+
+          {/* Option appliquer à tous les clients */}
+          <div className="bg-emerald-50/70 dark:bg-emerald-950/20 p-3 rounded-2xl border border-emerald-200 dark:border-emerald-800">
+            <label className="flex items-start space-x-2.5 rtl:space-x-reverse cursor-pointer">
+              <input
+                type="checkbox"
+                checked={updateAllClients}
+                onChange={(e) => setUpdateAllClients(e.target.checked)}
+                className="mt-0.5 w-4 h-4 text-emerald-600 rounded border-emerald-300 focus:ring-emerald-500"
+              />
+              <div>
+                <span className="text-xs font-black text-emerald-950 dark:text-emerald-300 block">
+                  {t('updateClientsDefault')}
+                </span>
+              </div>
+            </label>
+          </div>
+
+          {/* Boutons d'action */}
+          <div className="pt-2 flex items-center space-x-2 rtl:space-x-reverse">
+            <button
+              type="button"
+              onClick={onClose}
+              className="py-3 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-2xl transition"
+            >
+              {t('cancel')}
+            </button>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center space-x-1.5 rtl:space-x-reverse"
+            >
+              <Check className="w-4 h-4 stroke-[3]" />
+              <span>{saving ? t('saving') : t('savePriceBtn')}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

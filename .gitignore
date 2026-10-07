@@ -1,0 +1,15 @@
+# Node dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Local database and caches
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Logs and system files
+*.log
+.DS_Store
+Thumbs.db
+.env
