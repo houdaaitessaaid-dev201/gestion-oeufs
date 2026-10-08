@@ -99,6 +99,14 @@ export default function StockView({
             <span>{t('addDamageBtn')}</span>
           </button>
         </div>
+
+        {/* Bouton pour corriger / modifier le stock en cas d'erreur */}
+        <button
+          onClick={() => onOpenStockModal('adjust')}
+          className="w-full mt-2.5 flex items-center justify-center space-x-2 rtl:space-x-reverse py-3 px-4 bg-slate-800 hover:bg-slate-700/80 active:scale-95 text-amber-300 hover:text-amber-200 border border-amber-500/30 rounded-2xl font-bold text-xs shadow-xs transition"
+        >
+          <span>✏️ {t('adjustStockBtn')}</span>
+        </button>
       </div>
 
 
@@ -111,17 +119,18 @@ export default function StockView({
         </div>
 
         {/* Filtres simples */}
-        <div className="p-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex gap-1 text-xs">
+        <div className="p-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex gap-1 text-xs overflow-x-auto">
           {[
             { id: 'all', label: t('allFilter') },
             { id: 'in_purchase', label: `${t('purchaseEntry')} (+)` },
             { id: 'out_sale', label: `${t('saleExit')} (-)` },
-            { id: 'loss_damage', label: `${t('damageLoss')} (-)` }
+            { id: 'loss_damage', label: `${t('damageLoss')} (-)` },
+            { id: 'adjustment', label: `✏️ ${t('adjustmentEntry')}` }
           ].map(f => (
             <button
               key={f.id}
               onClick={() => setFilterType(f.id)}
-              className={`flex-1 py-1.5 px-1 font-bold rounded-xl transition text-[11px] ${
+              className={`flex-1 py-1.5 px-1 font-bold rounded-xl transition text-[11px] whitespace-nowrap ${
                 filterType === f.id
                   ? 'bg-slate-900 dark:bg-slate-700 text-white'
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
@@ -141,6 +150,7 @@ export default function StockView({
               const isPurchase = m.movement_type === 'in_purchase';
               const isSale = m.movement_type === 'out_sale';
               const isDamage = m.movement_type === 'loss_damage';
+              const isAdjustment = m.movement_type === 'adjustment';
 
               return (
                 <div key={m.id} className="p-3 flex items-center justify-between text-xs hover:bg-slate-50 dark:hover:bg-slate-800/50">
@@ -148,11 +158,13 @@ export default function StockView({
                     <div className={`p-2 rounded-xl text-xs font-black ${
                       isPurchase ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300' :
                       isSale ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300' :
-                      'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300'
+                      isDamage ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300' :
+                      'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300'
                     }`}>
                       {isPurchase && '+'}
                       {isSale && '-'}
                       {isDamage && '⚠️'}
+                      {isAdjustment && '✏️'}
                     </div>
 
                     <div>
@@ -160,6 +172,7 @@ export default function StockView({
                         {isPurchase && `${t('purchaseEntry')} (${m.supplier || t('supplierLabel')})`}
                         {isSale && t('saleExit')}
                         {isDamage && t('damageLoss')}
+                        {isAdjustment && (m.notes || t('adjustmentEntry'))}
                       </div>
                       <span className="text-[10px] text-slate-400 font-medium">
                         {m.movement_date}
@@ -169,7 +182,9 @@ export default function StockView({
 
                   <div className="text-right rtl:text-left">
                     <span className={`text-sm font-black ${
-                      m.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-800 dark:text-slate-200'
+                      m.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 
+                      m.quantity < 0 ? 'text-rose-600 dark:text-rose-400' :
+                      'text-slate-800 dark:text-slate-200'
                     }`}>
                       {m.quantity > 0 ? `+${m.quantity}` : m.quantity}
                     </span>

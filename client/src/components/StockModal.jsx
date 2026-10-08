@@ -1,32 +1,64 @@
-import React, { useState } from 'react';
-import { X, Check, Plus, AlertTriangle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Check, Plus, AlertTriangle, AlertCircle, Edit3 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function StockModal({ isOpen, onClose, mode = 'entry', onSuccess, currentUserId }) {
+export default function StockModal({ 
+  isOpen, 
+  onClose, 
+  mode = 'entry', 
+  onSuccess, 
+  currentUserId,
+  currentStock = 0 
+}) {
   if (!isOpen) return null;
 
   const { t } = useLanguage();
   const isEntry = mode === 'entry';
+  const isDamage = mode === 'damage';
+  const isAdjust = mode === 'adjust';
+
   const [quantity, setQuantity] = useState('');
   const [unitPrice, setUnitPrice] = useState('1.15');
   const [supplier, setSupplier] = useState('');
+  const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      if (isAdjust) {
+        setQuantity(currentStock > 0 ? currentStock.toString() : '');
+      } else {
+        setQuantity('');
+      }
+      setError('');
+    }
+  }, [isOpen, isAdjust, currentStock]);
 
   const qty = parseInt(quantity, 10) || 0;
   const price = parseFloat(unitPrice) || 0;
   const totalCost = Math.round(qty * price * 100) / 100;
+  const adjustDiff = isAdjust ? qty - currentStock : 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (qty <= 0) {
-      setError(isEntry ? t('howManyEggsAdd') : t('howManyEggsBroken'));
-      return;
+
+    if (isAdjust) {
+      if (isNaN(parseInt(quantity, 10)) || parseInt(quantity, 10) < 0) {
+        setError(t('howManyEggsAdjust'));
+        return;
+      }
+    } else {
+      if (qty <= 0) {
+        setError(isEntry ? t('howManyEggsAdd') : t('howManyEggsBroken'));
+        return;
+      }
     }
 
     try {
       setLoading(true);
       setError('');
+
       if (isEntry) {
         await onSuccess({
           type: 'entry',
@@ -36,11 +68,18 @@ export default function StockModal({ isOpen, onClose, mode = 'entry', onSuccess,
           notes: 'Achat d\'œufs',
           user_id: currentUserId || 1
         });
-      } else {
+      } else if (isDamage) {
         await onSuccess({
           type: 'damage',
           quantity: qty,
           notes: 'Œufs cassés',
+          user_id: currentUserId || 1
+        });
+      } else if (isAdjust) {
+        await onSuccess({
+          type: 'adjust',
+          new_stock: parseInt(quantity, 10),
+          notes: notes.trim() || `Correction (${currentStock} ➔ ${quantity})`,
           user_id: currentUserId || 1
         });
       }
@@ -57,14 +96,20 @@ export default function StockModal({ isOpen, onClose, mode = 'entry', onSuccess,
       <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col border dark:border-slate-800 transition-colors">
         {/* Header */}
         <div className={`px-5 py-3.5 text-white flex items-center justify-between border-b dark:border-slate-700 ${
-          isEntry ? 'bg-amber-600 dark:bg-slate-800' : 'bg-rose-600 dark:bg-rose-900'
+          isEntry ? 'bg-amber-600 dark:bg-slate-800' : 
+          isDamage ? 'bg-rose-600 dark:bg-rose-900' :
+          'bg-indigo-600 dark:bg-slate-800'
         }`}>
           <div>
             <h2 className="text-base font-black leading-tight">
-              {isEntry ? t('stockModalEntryTitle') : t('stockModalDamageTitle')}
+              {isEntry ? t('stockModalEntryTitle') : 
+               isDamage ? t('stockModalDamageTitle') : 
+               t('stockModalAdjustTitle')}
             </h2>
             <p className="text-xs text-white/90 dark:text-slate-300 font-medium mt-0.5">
-              {isEntry ? t('stockModalEntrySub') : t('stockModalDamageSub')}
+              {isEntry ? t('stockModalEntrySub') : 
+               isDamage ? t('stockModalDamageSub') : 
+               t('stockModalAdjustSub')}
             </p>
           </div>
           <button
@@ -84,29 +129,63 @@ export default function StockModal({ isOpen, onClose, mode = 'entry', onSuccess,
             </div>
           )}
 
-          {/* Quantity */}
+          {/* Si Mode Ajustement / Correction : Rappel du stock actuel */}
+          {isAdjust && (
+            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div>
+                <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 block">
+                  {t('currentStockIs')}
+                </span>
+                <span className="text-xl font-black text-slate-900 dark:text-white">
+                  {currentStock.toLocaleString('fr-FR')} <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{t('eggs')}</span>
+                </span>
+              </div>
+              <span className="text-xs font-extrabold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700">
+                ~{Math.floor(currentStock / 30)} {t('plateaux')}
+              </span>
+            </div>
+          )}
+
+          {/* Saisie Quantité */}
           <div>
             <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1">
-              {isEntry ? t('howManyEggsAdd') : t('howManyEggsBroken')}
+              {isEntry ? t('howManyEggsAdd') : 
+               isDamage ? t('howManyEggsBroken') : 
+               t('howManyEggsAdjust')}
             </label>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <input
                 type="number"
-                min="1"
+                min="0"
                 step="1"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 className="w-full text-3xl font-black px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none"
-                placeholder={isEntry ? 'Ex: 1500' : 'Ex: 15'}
+                placeholder={isEntry ? 'Ex: 1500' : isDamage ? 'Ex: 15' : 'Ex: 3000'}
                 required
                 autoFocus
               />
               <span className="text-base font-extrabold text-slate-500 dark:text-slate-400 whitespace-nowrap">{t('eggs')}</span>
             </div>
 
-            {/* Presets */}
+            {/* Différence en mode Ajustement */}
+            {isAdjust && quantity !== '' && !isNaN(parseInt(quantity, 10)) && (
+              <div className="mt-2 text-xs font-black flex items-center space-x-1.5 rtl:space-x-reverse">
+                <span className="text-slate-500 dark:text-slate-400">Écart :</span>
+                <span className={adjustDiff >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
+                  {adjustDiff >= 0 ? `+${adjustDiff}` : adjustDiff} {t('eggs')} ({adjustDiff >= 0 ? `+${Math.floor(adjustDiff / 30)}` : Math.floor(adjustDiff / 30)} {t('plateaux')})
+                </span>
+              </div>
+            )}
+
+            {/* Presets rapides */}
             <div className="flex items-center gap-1.5 mt-2">
-              {(isEntry ? [300, 600, 1500, 3000, 6000] : [5, 10, 15, 30, 60]).map((preset) => (
+              {(isEntry 
+                ? [300, 600, 1500, 3000, 6000] 
+                : isDamage 
+                ? [5, 10, 15, 30, 60]
+                : [0, 300, 900, 1500, 3000]
+              ).map((preset) => (
                 <button
                   type="button"
                   key={preset}
@@ -161,6 +240,22 @@ export default function StockModal({ isOpen, onClose, mode = 'entry', onSuccess,
             </>
           )}
 
+          {/* Note facultative pour ajustement */}
+          {isAdjust && (
+            <div>
+              <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-1">
+                {t('notesLabel')}
+              </label>
+              <input
+                type="text"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Ex: Erreur de saisie précédente / Comptage van"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-xs focus:outline-none placeholder-slate-400 dark:placeholder-slate-500"
+              />
+            </div>
+          )}
+
           {/* Actions */}
           <div className="pt-2 flex gap-2.5">
             <button
@@ -174,7 +269,9 @@ export default function StockModal({ isOpen, onClose, mode = 'entry', onSuccess,
               type="submit"
               disabled={loading}
               className={`flex-2 py-3 text-white font-black text-sm rounded-2xl shadow-md active:scale-95 transition flex items-center justify-center space-x-1.5 rtl:space-x-reverse disabled:opacity-50 ${
-                isEntry ? 'bg-amber-600 hover:bg-amber-700' : 'bg-rose-600 hover:bg-rose-700'
+                isEntry ? 'bg-amber-600 hover:bg-amber-700' : 
+                isDamage ? 'bg-rose-600 hover:bg-rose-700' :
+                'bg-indigo-600 hover:bg-indigo-700'
               }`}
             >
               {loading ? (
@@ -182,7 +279,11 @@ export default function StockModal({ isOpen, onClose, mode = 'entry', onSuccess,
               ) : (
                 <>
                   <Check className="w-5 h-5 stroke-[3]" />
-                  <span>{isEntry ? t('addToStockBtn') : t('removeFromStockBtn')}</span>
+                  <span>
+                    {isEntry ? t('addToStockBtn') : 
+                     isDamage ? t('removeFromStockBtn') : 
+                     t('saveAdjustmentBtn')}
+                  </span>
                 </>
               )}
             </button>

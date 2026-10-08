@@ -60,7 +60,8 @@ export function initStorage() {
   if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
     setLocal(STORAGE_KEYS.SETTINGS, {
       current_egg_price: 1.35,
-      current_purchase_price: 1.15
+      current_purchase_price: 1.15,
+      profit_per_egg: 0.20
     });
   }
 
@@ -110,7 +111,7 @@ export const localStorageApi = {
     const sales = getLocal(STORAGE_KEYS.SALES, []);
     const payments = getLocal(STORAGE_KEYS.PAYMENTS, []);
     const visits = getLocal(STORAGE_KEYS.VISITS, []);
-    const settings = getLocal(STORAGE_KEYS.SETTINGS, { current_egg_price: 1.35, current_purchase_price: 1.15 });
+    const settings = getLocal(STORAGE_KEYS.SETTINGS, { current_egg_price: 1.35, current_purchase_price: 1.15, profit_per_egg: 0.20 });
 
     // 1. Stock actuel
     const currentStock = stockMovements.reduce((sum, sm) => sum + (Number(sm.quantity) || 0), 0);
@@ -137,15 +138,13 @@ export const localStorageApi = {
     const eggsDistributedToday = todaySales.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
     const totalSalesToday = Math.round(todaySales.reduce((sum, s) => sum + (Number(s.total_amount) || 0), 0) * 100) / 100;
 
-    // 6. Prix et Bénéfice du jour
+    // 6. Prix et Bénéfice du jour (calculé selon la marge nette par œuf choisie)
     const currentSellPrice = parseFloat(settings.current_egg_price) || 1.35;
-    let currentPurchasePrice = parseFloat(settings.current_purchase_price);
-    if (!currentPurchasePrice || isNaN(currentPurchasePrice) || currentPurchasePrice >= currentSellPrice) {
-      currentPurchasePrice = Math.max(0.10, Math.round((currentSellPrice - 0.20) * 100) / 100);
-    }
+    const profitPerEgg = settings.profit_per_egg !== undefined && !isNaN(parseFloat(settings.profit_per_egg))
+      ? parseFloat(settings.profit_per_egg)
+      : 0.20;
 
-    const costOfGoodsSold = eggsDistributedToday * currentPurchasePrice;
-    const todayProfit = Math.max(0, Math.round((totalSalesToday - costOfGoodsSold) * 100) / 100);
+    const todayProfit = Math.max(0, Math.round((eggsDistributedToday * profitPerEgg) * 100) / 100);
 
     return {
       currentStock,
@@ -160,7 +159,7 @@ export const localStorageApi = {
       eggsDistributedToday,
       totalSalesToday,
       todayProfit,
-      currentPurchasePrice,
+      profitPerEgg,
       currentSellPrice
     };
   },
@@ -256,6 +255,39 @@ export const localStorageApi = {
       success: true,
       movementId: newMovement.id,
       currentStock: newStock
+    };
+  },
+
+  adjustStock: async (data) => {
+    initStorage();
+    const targetStock = parseInt(data.new_stock, 10);
+    if (isNaN(targetStock) || targetStock < 0) {
+      throw new Error("Le stock doit être un nombre positif ou 0");
+    }
+
+    const stockMovements = getLocal(STORAGE_KEYS.STOCK, []);
+    const currentStock = stockMovements.reduce((sum, sm) => sum + (Number(sm.quantity) || 0), 0);
+    const diff = targetStock - currentStock;
+
+    const newMovement = {
+      id: nextId(stockMovements),
+      movement_type: 'adjustment',
+      quantity: diff,
+      unit_price: 0,
+      supplier: null,
+      user_id: data.user_id || 1,
+      notes: data.notes || `Correction manuelle du stock (${currentStock} ➔ ${targetStock})`,
+      movement_date: getNowIsoString()
+    };
+
+    stockMovements.push(newMovement);
+    setLocal(STORAGE_KEYS.STOCK, stockMovements);
+
+    return {
+      success: true,
+      movementId: newMovement.id,
+      currentStock: targetStock,
+      diff
     };
   },
 
@@ -859,14 +891,18 @@ export const localStorageApi = {
     ]);
   },
 
-  // --- Prix du jour ---
+  // --- Prix du jour & Marge nette ---
   getEggPrice: async () => {
     initStorage();
-    const settings = getLocal(STORAGE_KEYS.SETTINGS, { current_egg_price: 1.35, current_purchase_price: 1.15 });
+    const settings = getLocal(STORAGE_KEYS.SETTINGS, { current_egg_price: 1.35, current_purchase_price: 1.15, profit_per_egg: 0.20 });
     const price = parseFloat(settings.current_egg_price) || 1.35;
+    const profitPerEgg = settings.profit_per_egg !== undefined && !isNaN(parseFloat(settings.profit_per_egg))
+      ? parseFloat(settings.profit_per_egg)
+      : 0.20;
     return {
       price,
-      plateau_price: Math.round(price * 30 * 100) / 100
+      plateau_price: Math.round(price * 30 * 100) / 100,
+      profit_per_egg: profitPerEgg
     };
   },
 
@@ -880,6 +916,10 @@ export const localStorageApi = {
 
     const settings = getLocal(STORAGE_KEYS.SETTINGS, {});
     settings.current_egg_price = roundedPrice;
+
+    if (data.profit_per_egg !== undefined && !isNaN(parseFloat(data.profit_per_egg))) {
+      settings.profit_per_egg = Math.round(parseFloat(data.profit_per_egg) * 100) / 100;
+    }
     setLocal(STORAGE_KEYS.SETTINGS, settings);
 
     if (data.update_all_clients) {
@@ -890,11 +930,14 @@ export const localStorageApi = {
       setLocal(STORAGE_KEYS.CLIENTS, clients);
     }
 
+    const currentProfit = settings.profit_per_egg !== undefined ? settings.profit_per_egg : 0.20;
+
     return {
       success: true,
       price: roundedPrice,
       plateau_price: plateauPrice,
-      message: `Nouveau prix fixé à ${roundedPrice.toFixed(2)} DH/œuf (${plateauPrice.toFixed(2)} DH le plateau)`
+      profit_per_egg: currentProfit,
+      message: `Nouveau prix fixé à ${roundedPrice.toFixed(2)} DH/œuf (Bénéfice : ${currentProfit.toFixed(2)} DH/œuf)`
     };
   },
 

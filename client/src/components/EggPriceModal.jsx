@@ -2,10 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { X, Check, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function EggPriceModal({ isOpen, onClose, currentPrice, onSavePrice }) {
+export default function EggPriceModal({ 
+  isOpen, 
+  onClose, 
+  currentPrice, 
+  currentProfitPerEgg = 0.20, 
+  onSavePrice 
+}) {
   const { t } = useLanguage();
   const [eggPrice, setEggPrice] = useState('1.35');
   const [plateauPrice, setPlateauPrice] = useState('40.50');
+  const [profitPerEgg, setProfitPerEgg] = useState('0.20');
   const [updateAllClients, setUpdateAllClients] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -13,12 +20,14 @@ export default function EggPriceModal({ isOpen, onClose, currentPrice, onSavePri
   useEffect(() => {
     if (isOpen) {
       const p = currentPrice || 1.35;
+      const profit = currentProfitPerEgg !== undefined ? currentProfitPerEgg : 0.20;
       setEggPrice(p.toFixed(2));
       setPlateauPrice((p * 30).toFixed(2));
+      setProfitPerEgg(profit.toFixed(2));
       setUpdateAllClients(true);
       setError('');
     }
-  }, [isOpen, currentPrice]);
+  }, [isOpen, currentPrice, currentProfitPerEgg]);
 
   if (!isOpen) return null;
 
@@ -51,8 +60,14 @@ export default function EggPriceModal({ isOpen, onClose, currentPrice, onSavePri
   const handleSubmit = async (e) => {
     e.preventDefault();
     const finalPrice = parseFloat(eggPrice);
+    const finalProfit = parseFloat(profitPerEgg);
+
     if (isNaN(finalPrice) || finalPrice <= 0) {
       setError(t('error'));
+      return;
+    }
+    if (isNaN(finalProfit) || finalProfit < 0) {
+      setError(t('profitPerEggLabel'));
       return;
     }
 
@@ -60,6 +75,7 @@ export default function EggPriceModal({ isOpen, onClose, currentPrice, onSavePri
       setSaving(true);
       await onSavePrice({
         price: finalPrice,
+        profit_per_egg: finalProfit,
         update_all_clients: updateAllClients
       });
       onClose();
@@ -178,8 +194,58 @@ export default function EggPriceModal({ isOpen, onClose, currentPrice, onSavePri
             </div>
           </div>
 
+          {/* Marge bénéficiaire par œuf (Mon bénéfice net par œuf) */}
+          <div className="bg-emerald-50/70 dark:bg-emerald-950/20 p-3.5 rounded-2xl border-2 border-emerald-300 dark:border-emerald-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="block text-[11px] font-black text-emerald-950 dark:text-emerald-300 uppercase tracking-wider">
+                {t('profitPerEggLabel')}
+              </label>
+              <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-lg border border-emerald-200 dark:border-emerald-700">
+                ربحي الصافي
+              </span>
+            </div>
+
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={profitPerEgg}
+                onChange={(e) => setProfitPerEgg(e.target.value)}
+                className="w-full text-2xl font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 py-1.5 px-3 rounded-xl border border-emerald-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="0.20"
+                required
+              />
+              <span className="text-xs font-black text-emerald-900 dark:text-emerald-300 shrink-0 whitespace-nowrap">
+                {t('dh')} / {t('egg')}
+              </span>
+            </div>
+
+            <p className="text-[10px] text-emerald-800 dark:text-emerald-400 font-medium">
+              {t('profitPerEggHelp')}
+            </p>
+
+            {/* Presets rapides de marge */}
+            <div className="flex items-center gap-1.5 pt-1">
+              {['0.10', '0.15', '0.20', '0.25', '0.30'].map((preset) => (
+                <button
+                  type="button"
+                  key={preset}
+                  onClick={() => setProfitPerEgg(preset)}
+                  className={`flex-1 py-1 text-xs font-black rounded-lg transition active:scale-95 border ${
+                    profitPerEgg === preset
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-emerald-200 dark:border-slate-700 hover:bg-emerald-100/50'
+                  }`}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Option appliquer à tous les clients */}
-          <div className="bg-emerald-50/70 dark:bg-emerald-950/20 p-3 rounded-2xl border border-emerald-200 dark:border-emerald-800">
+          <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
             <label className="flex items-start space-x-2.5 rtl:space-x-reverse cursor-pointer">
               <input
                 type="checkbox"
@@ -188,7 +254,7 @@ export default function EggPriceModal({ isOpen, onClose, currentPrice, onSavePri
                 className="mt-0.5 w-4 h-4 text-emerald-600 rounded border-emerald-300 focus:ring-emerald-500"
               />
               <div>
-                <span className="text-xs font-black text-emerald-950 dark:text-emerald-300 block">
+                <span className="text-xs font-black text-slate-800 dark:text-slate-200 block">
                   {t('updateClientsDefault')}
                 </span>
               </div>

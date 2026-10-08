@@ -137,10 +137,18 @@ export const translations = {
     // Stock Modal
     stockModalEntryTitle: "Ajouter du Stock (Entrée œufs)",
     stockModalDamageTitle: "Déclarer des œufs cassés",
+    stockModalAdjustTitle: "Modifier / Corriger le Stock Réel",
     stockModalEntrySub: "Ajouter des œufs au stock (achat / rechargement)",
     stockModalDamageSub: "Enlever les œufs abîmés ou cassés",
+    stockModalAdjustSub: "Saisir la quantité exacte réelle en cas d'erreur",
     howManyEggsAdd: "Combien d'œufs à ajouter au stock ?",
     howManyEggsBroken: "Combien d'œufs cassés ?",
+    howManyEggsAdjust: "Nouveau stock exact (total d'œufs dans le véhicule) *",
+    currentStockIs: "Stock actuellement affiché :",
+    adjustStockBtn: "✏️ Modifier le stock",
+    quickAdjustStock: "✏️ Modifier",
+    saveAdjustmentBtn: "Valider la Correction",
+    adjustmentEntry: "Correction manuelle",
     quantityEggsLabel: "Quantité d'œufs *",
     purchasePriceLabel: "Prix d'achat unitaire (DH/œuf)",
     totalCost: "Coût Total",
@@ -210,12 +218,14 @@ export const translations = {
     clientLabel: "Client :",
 
     // Egg Price Modal
-    eggPriceModalTitle: "Prix du Jour des Œufs",
-    eggPriceModalSubtitle: "Mise à jour du tarif de base selon le marché",
-    unitPriceInputLabel: "Prix à l'unité (DH / œuf)",
+    eggPriceModalTitle: "Prix du Jour & Bénéfice par Œuf",
+    eggPriceModalSubtitle: "Tarif de vente et marge bénéficiaire par œuf",
+    unitPriceInputLabel: "Prix de vente à l'unité (DH / œuf)",
     plateauPriceInputLabel: "Prix du plateau (30 pièces)",
+    profitPerEggLabel: "Mon bénéfice net par œuf (DH)",
+    profitPerEggHelp: "Multiplié par les œufs vendus pour calculer le Bénéfice du jour",
     updateClientsDefault: "Appliquer ce tarif aux futures commandes",
-    savePriceBtn: "Enregistrer le Prix"
+    savePriceBtn: "Enregistrer"
   },
 
   ar: {
@@ -352,14 +362,22 @@ export const translations = {
     saleExit: "خروج (بيع)",
     damageLoss: "بيض مكسور / ضياع",
     initialStock: "مخزون أولي",
+    adjustmentEntry: "تصحيح يدوي",
 
     // Stock Modal
     stockModalEntryTitle: "شحن المخزون (دخول بيض)",
     stockModalDamageTitle: "تسجيل بيض مكسور",
+    stockModalAdjustTitle: "تعديل / تصحيح المخزون الفعلي",
     stockModalEntrySub: "إضافة بيض إلى المخزون (شراء / شحن)",
     stockModalDamageSub: "خصم البيض المكسور أو الفاسد",
+    stockModalAdjustSub: "إدخال الكمية الحقيقية المضبوطة في حالة الخطأ",
     howManyEggsAdd: "كمية البيض المراد إضافتها ؟",
     howManyEggsBroken: "كمية البيض المكسور ؟",
+    howManyEggsAdjust: "الكمية الحقيقية الجديدة (مجموع البيض في الشاحنة) *",
+    currentStockIs: "المخزون المسجل حالياً :",
+    adjustStockBtn: "✏️ تعديل المخزون",
+    quickAdjustStock: "✏️ تعديل",
+    saveAdjustmentBtn: "تأكيد التصحيح",
     quantityEggsLabel: "كمية البيض *",
     purchasePriceLabel: "ثمن الشراء الفردي (درهم/بيضة)",
     totalCost: "التكلفة الإجمالية",
@@ -429,11 +447,13 @@ export const translations = {
     clientLabel: "الزبون :",
 
     // Egg Price Modal
-    eggPriceModalTitle: "ثمن البيض اليوم",
-    eggPriceModalSubtitle: "تحديث السعر المعتمد حسب السوق",
-    unitPriceInputLabel: "الثمن بالقطعة (درهم / بيضة)",
+    eggPriceModalTitle: "ثمن البيض والربح الصافي في كل بيضة",
+    eggPriceModalSubtitle: "ثمن البيع ونسبة ربحك الصافي في كل بيضة",
+    unitPriceInputLabel: "ثمن البيع بالقطعة (درهم / بيضة)",
     plateauPriceInputLabel: "ثمن البلاطو (30 بيضة)",
+    profitPerEggLabel: "ربحي الصافي في كل بيضة (درهم)",
+    profitPerEggHelp: "يُضرب في عدد البيض المباع لحساب مدخولك وأرباحك اليومية الصافية",
     updateClientsDefault: "تطبيق هذا الثمن على الطلبيات القادمة",
-    savePriceBtn: "حفظ الثمن"
+    savePriceBtn: "حفظ"
   }
 };

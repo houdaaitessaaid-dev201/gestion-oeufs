@@ -1,14 +1,11 @@
 import React from 'react';
-import { RefreshCw, Moon, Sun, ShieldCheck } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 
 export default function Header({ 
-  onRefresh, 
-  loading,
   currentEggPrice = 1.35,
-  onOpenPriceModal,
-  onOpenBackupModal
+  onOpenPriceModal 
 }) {
   const { lang, toggleLanguage, t } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
@@ -54,31 +51,6 @@ export default function Header({
               <Moon className="w-4 h-4 text-amber-100" />
             )}
           </button>
-
-          {/* Bouton actualiser */}
-          <button
-            onClick={onRefresh}
-            disabled={loading}
-            aria-label={t('refresh')}
-            className={`p-2 rounded-xl bg-amber-700/70 hover:bg-amber-700 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-95 transition text-amber-100 hover:text-white border border-white/20 dark:border-slate-700 ${
-              loading ? 'animate-spin' : ''
-            }`}
-            title={t('refresh')}
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-
-          {/* Bouton Sauvegarde & Restauration */}
-          {onOpenBackupModal && (
-            <button
-              onClick={onOpenBackupModal}
-              className="p-2 rounded-xl bg-amber-700/70 hover:bg-amber-700 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-95 transition text-amber-200 hover:text-white border border-white/20 dark:border-slate-700"
-              title={t('backupTitle')}
-              aria-label={t('backupTitle')}
-            >
-              <ShieldCheck className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </div>
 

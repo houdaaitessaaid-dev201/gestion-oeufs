@@ -9,7 +9,8 @@ export default function DashboardView({
   dashboardData, 
   onNavigate, 
   onOpenStockModal, 
-  onOpenClientModal 
+  onOpenClientModal,
+  onOpenPriceModal
 }) {
   const { t } = useLanguage();
   if (!dashboardData) return null;
@@ -23,8 +24,8 @@ export default function DashboardView({
     eggsDistributedToday = 0,
     totalSalesToday = 0,
     todayProfit = 0,
-    currentPurchasePrice = 0.80,
-    currentSellPrice = 1.00
+    profitPerEgg = 0.20,
+    currentSellPrice = 1.35
   } = dashboardData;
 
   const visitPercent = visitsToday.toVisit > 0 
@@ -86,7 +87,7 @@ export default function DashboardView({
           <span className="text-base font-bold text-amber-600 dark:text-amber-500">{t('eggs')}</span>
         </div>
 
-        {/* 2 Gros boutons faciles pour le stock */}
+        {/* Gros boutons faciles pour le stock */}
         <div className="grid grid-cols-2 gap-2.5 pt-2">
           <button
             onClick={() => onOpenStockModal('entry')}
@@ -104,6 +105,14 @@ export default function DashboardView({
             <span>{t('recordDamage')}</span>
           </button>
         </div>
+
+        {/* Bouton rapide pour modifier/corriger le stock */}
+        <button
+          onClick={() => onOpenStockModal('adjust')}
+          className="w-full flex items-center justify-center space-x-1.5 rtl:space-x-reverse py-2.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 active:scale-95 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-xs rounded-xl transition"
+        >
+          <span>✏️ {t('adjustStockBtn')}</span>
+        </button>
       </div>
 
       {/* BLOC 3 : BÉNÉFICE DU JOUR & FINANCES */}
@@ -124,9 +133,22 @@ export default function DashboardView({
                 </span>
               </div>
             </div>
-            <span className="text-xs font-black bg-white/20 px-3 py-1 rounded-full text-white">
-              ~{eggsDistributedToday > 0 ? (todayProfit / eggsDistributedToday).toFixed(2) : ((currentSellPrice - currentPurchasePrice).toFixed(2))} DH / {t('egg')}
-            </span>
+
+            {/* Badge de marge par œuf cliquable pour la modifier facilement */}
+            {onOpenPriceModal ? (
+              <button
+                onClick={onOpenPriceModal}
+                className="text-xs font-black bg-white/20 hover:bg-white/30 active:scale-95 px-3 py-1 rounded-full text-white transition flex items-center space-x-1 rtl:space-x-reverse cursor-pointer border border-white/20"
+                title="Modifier mon bénéfice par œuf"
+              >
+                <span>🎯 {profitPerEgg !== undefined ? Number(profitPerEgg).toFixed(2) : '0.20'} DH / {t('egg')}</span>
+                <span className="text-[10px] opacity-80">✏️</span>
+              </button>
+            ) : (
+              <span className="text-xs font-black bg-white/20 px-3 py-1 rounded-full text-white">
+                🎯 {profitPerEgg !== undefined ? Number(profitPerEgg).toFixed(2) : '0.20'} DH / {t('egg')}
+              </span>
+            )}
           </div>
 
           <div className="flex items-baseline space-x-2 rtl:space-x-reverse my-1">

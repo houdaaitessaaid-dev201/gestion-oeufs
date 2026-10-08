@@ -49,8 +49,9 @@ export default function App() {
   const [clientDetailOpen, setClientDetailOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState(null);
 
-  // Prix du jour des œufs
+  // Prix du jour des œufs et marge nette
   const [currentEggPrice, setCurrentEggPrice] = useState(1.35);
+  const [profitPerEgg, setProfitPerEgg] = useState(0.20);
   const [eggPriceModalOpen, setEggPriceModalOpen] = useState(false);
   const [backupModalOpen, setBackupModalOpen] = useState(false);
 
@@ -81,7 +82,7 @@ export default function App() {
         api.getStock(),
         api.getDebts(),
         api.getPayments(),
-        api.getEggPrice().catch(() => ({ price: 1.35 }))
+        api.getEggPrice().catch(() => ({ price: 1.35, profit_per_egg: 0.20 }))
       ]);
 
       setUsers(usersRes);
@@ -98,6 +99,9 @@ export default function App() {
       setPaymentsList(paymentsRes);
       if (priceRes?.price) {
         setCurrentEggPrice(priceRes.price);
+      }
+      if (priceRes?.profit_per_egg !== undefined) {
+        setProfitPerEgg(priceRes.profit_per_egg);
       }
     } catch (err) {
       console.error('Erreur chargement données:', err);
@@ -151,13 +155,20 @@ export default function App() {
           user_id: currentUser?.id || 1
         });
         showToast(`Stock rechargé : +${stockPayload.quantity} œufs`);
-      } else {
+      } else if (stockPayload.type === 'damage') {
         await api.addStockDamage({
           quantity: stockPayload.quantity,
           notes: stockPayload.notes,
           user_id: currentUser?.id || 1
         });
         showToast(`${stockPayload.quantity} œufs cassés enlevés du stock`);
+      } else if (stockPayload.type === 'adjust') {
+        await api.adjustStock({
+          new_stock: stockPayload.new_stock,
+          notes: stockPayload.notes,
+          user_id: currentUser?.id || 1
+        });
+        showToast(`Stock corrigé : ${stockPayload.new_stock} œufs`);
       }
       await loadInitialData();
     } catch (err) {
@@ -229,11 +240,14 @@ export default function App() {
     }
   };
 
-  const handleSaveEggPrice = async ({ price, update_all_clients }) => {
+  const handleSaveEggPrice = async ({ price, profit_per_egg, update_all_clients }) => {
     try {
-      const res = await api.updateEggPrice({ price, update_all_clients });
+      const res = await api.updateEggPrice({ price, profit_per_egg, update_all_clients });
       setCurrentEggPrice(res.price);
-      showToast(res.message || `Nouveau prix fixé à ${res.price.toFixed(2)} DH/œuf !`);
+      if (res.profit_per_egg !== undefined) {
+        setProfitPerEgg(res.profit_per_egg);
+      }
+      showToast(res.message || `Tarif et marge enregistrés avec succès !`);
       await loadInitialData();
     } catch (err) {
       showToast(err.message || 'Erreur lors de la mise à jour du prix', 'error');
@@ -285,6 +299,7 @@ export default function App() {
               setClientToEdit(null);
               setClientModalOpen(true);
             }}
+            onOpenPriceModal={() => setEggPriceModalOpen(true)}
           />
         )}
 
@@ -427,6 +442,7 @@ export default function App() {
         mode={stockModalMode}
         onSuccess={handleStockSuccess}
         currentUserId={currentUser?.id}
+        currentStock={stockData?.currentStock ?? dashboardData?.currentStock ?? 0}
       />
 
       <ClientDetailModal
@@ -451,11 +467,12 @@ export default function App() {
         }}
       />
 
-      {/* Modal Changement Prix du Jour des Œufs */}
+      {/* Modal Changement Prix du Jour des Œufs et Marge de Bénéfice */}
       <EggPriceModal
         isOpen={eggPriceModalOpen}
         onClose={() => setEggPriceModalOpen(false)}
         currentPrice={currentEggPrice}
+        currentProfitPerEgg={profitPerEgg}
         onSavePrice={handleSaveEggPrice}
       />
 
