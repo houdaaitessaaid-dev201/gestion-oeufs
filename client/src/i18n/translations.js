@@ -219,22 +219,30 @@ export const translations = {
     managerLabel: "Responsable :",
     clientLabel: "Client :",
 
-    // Egg Price Modal
-    eggPriceModalTitle: "Prix du Jour & Bénéfice par Œuf",
-    eggPriceModalSubtitle: "Tarif de vente et marge bénéficiaire par œuf",
+    // Egg Price Modal (Prix de vente uniquement)
+    eggPriceModalTitle: "Prix de Vente des Œufs",
+    eggPriceModalSubtitle: "Modifier le tarif unitaire et par plateau (30 œufs)",
     unitPriceInputLabel: "Prix de vente à l'unité (DH / œuf)",
     plateauPriceInputLabel: "Prix du plateau (30 pièces)",
-    profitPerEggLabel: "Mon bénéfice net par œuf (DH)",
-    profitPerEggHelp: "Multiplié par les œufs vendus pour calculer le Bénéfice du jour",
     updateClientsDefault: "Appliquer ce tarif aux futures commandes",
-    savePriceBtn: "Enregistrer",
-    eggPriceTodayTitle: "Tarif du Jour des Œufs",
-    eggPriceTodaySub: "Prix de vente et marge par œuf",
+    savePriceBtn: "Enregistrer le Prix de Vente",
+    eggPriceTodayTitle: "Tarif de Vente des Œufs",
+    eggPriceTodaySub: "Prix de vente unitaire et par plateau",
     plateauPriceLabel: "Prix du plateau (30 œufs)",
-    editPriceAndProfitBtn: "✏️ Modifier le Prix et le Bénéfice",
     editPriceBtn: "✏️ Modifier le Prix de Vente",
+
+    // Profit Modal (Bénéfice net uniquement)
+    profitModalTitle: "Mon Bénéfice Net par Œuf",
+    profitModalSubtitle: "Définir combien vous gagnez sur chaque œuf vendu",
+    profitPerEggLabel: "Mon bénéfice net par œuf (DH)",
+    profitPerEggHelp: "Multiplié par les œufs vendus et payés pour calculer votre bénéfice du jour",
+    profitAmountLabel: "Bénéfice net par œuf :",
+    saveProfitBtn: "Enregistrer mon Bénéfice",
+    plateauProfitSummary: "Soit {amount} DH de bénéfice net par plateau (30 œufs)",
+    profitPerEggTitle: "Mon Bénéfice Net par Œuf",
+    profitPerEggSub: "Calculé automatiquement sur chaque œuf payé",
     editProfitBtn: "✏️ Modifier mon Bénéfice",
-    quickProfitPresets: "Choisir un bénéfice rapide par œuf :",
+    quickProfitPresets: "Choisir un bénéfice rapide en 1 clic :",
     modify: "Modifier"
   },
 
@@ -458,22 +466,30 @@ export const translations = {
     managerLabel: "المسؤول :",
     clientLabel: "الزبون :",
 
-    // Egg Price Modal
-    eggPriceModalTitle: "ثمن البيض والربح الصافي في كل بيضة",
-    eggPriceModalSubtitle: "ثمن البيع ونسبة ربحك الصافي في كل بيضة",
+    // Egg Price Modal (ثمن بيع البيض فقط)
+    eggPriceModalTitle: "ثمن بيع البيض اليوم",
+    eggPriceModalSubtitle: "تعديل ثمن البيضة الواحدة وثمن البلاطو (30 بيضة)",
     unitPriceInputLabel: "ثمن البيع بالقطعة (درهم / بيضة)",
     plateauPriceInputLabel: "ثمن البلاطو (30 بيضة)",
-    profitPerEggLabel: "ربحي الصافي في كل بيضة (درهم)",
-    profitPerEggHelp: "يُضرب في عدد البيض المباع لحساب مدخولك وأرباحك اليومية الصافية",
     updateClientsDefault: "تطبيق هذا الثمن على الطلبيات القادمة",
-    savePriceBtn: "حفظ",
-    eggPriceTodayTitle: "ثمن البيض اليوم والربح الصافي",
-    eggPriceTodaySub: "سعر بيع البيضة والبلاطو ونسبة ربحك",
+    savePriceBtn: "حفظ ثمن البيع",
+    eggPriceTodayTitle: "ثمن بيع البيض اليوم",
+    eggPriceTodaySub: "سعر بيع البيضة الواحدة والبلاطو (30)",
     plateauPriceLabel: "ثمن البلاطو (30 بيضة)",
-    editPriceAndProfitBtn: "✏️ تعديل ثمن البيض والربح الصافي",
     editPriceBtn: "✏️ تعديل ثمن البيع",
-    editProfitBtn: "✏️ تعديل ربحي الصافي",
-    quickProfitPresets: "تغيير سريع لربحك الصافي في كل بيضة :",
+
+    // Profit Modal (الربح الصافي في كل بيضة فقط)
+    profitModalTitle: "ربحي الصافي في كل بيضة",
+    profitModalSubtitle: "حدد شحال كتربح صافي في كل بيضة كتباع",
+    profitPerEggLabel: "ربحي الصافي في كل بيضة (درهم)",
+    profitPerEggHelp: "يُضرب في عدد البيض المباع والمؤدى لحساب مدخولك وأرباحك اليومية",
+    profitAmountLabel: "مبلغ ربحي الصافي في البيضة :",
+    saveProfitBtn: "حفظ الربح الصافي",
+    plateauProfitSummary: "أي {amount} درهم ربح صافي في كل بلاطو (30 بيضة)",
+    profitPerEggTitle: "ربحي الصافي في كل بيضة",
+    profitPerEggSub: "يُحسب تلقائياً في مدخول اليوم عن كل بيضة مؤداة",
+    editProfitBtn: "✏️ تعديل ربحي في البيضة",
+    quickProfitPresets: "تغيير سريع لربحك بنقرة واحدة :",
     modify: "تعديل"
   }
 };

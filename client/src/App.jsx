@@ -13,6 +13,7 @@ import ClientModal from './components/ClientModal';
 import StockModal from './components/StockModal';
 import ClientDetailModal from './components/ClientDetailModal';
 import EggPriceModal from './components/EggPriceModal';
+import ProfitModal from './components/ProfitModal';
 import BackupModal from './components/BackupModal';
 
 import { api } from './api';
@@ -53,6 +54,7 @@ export default function App() {
   const [currentEggPrice, setCurrentEggPrice] = useState(1.35);
   const [profitPerEgg, setProfitPerEgg] = useState(0.20);
   const [eggPriceModalOpen, setEggPriceModalOpen] = useState(false);
+  const [profitModalOpen, setProfitModalOpen] = useState(false);
   const [backupModalOpen, setBackupModalOpen] = useState(false);
 
   const showToast = (message, type = 'success') => {
@@ -240,17 +242,28 @@ export default function App() {
     }
   };
 
-  const handleSaveEggPrice = async ({ price, profit_per_egg, update_all_clients }) => {
+  const handleSaveEggPrice = async ({ price, update_all_clients }) => {
     try {
-      const res = await api.updateEggPrice({ price, profit_per_egg, update_all_clients });
+      const res = await api.updateEggPrice({ price, update_all_clients });
       setCurrentEggPrice(res.price);
-      if (res.profit_per_egg !== undefined) {
-        setProfitPerEgg(res.profit_per_egg);
-      }
-      showToast(res.message || `Tarif et marge enregistrés avec succès !`);
+      showToast(`Prix de vente mis à jour : ${res.price.toFixed(2)} DH / œuf !`);
       await loadInitialData();
     } catch (err) {
       showToast(err.message || 'Erreur lors de la mise à jour du prix', 'error');
+      throw err;
+    }
+  };
+
+  const handleSaveProfit = async ({ profit_per_egg }) => {
+    try {
+      const res = await api.updateEggPrice({ profit_per_egg });
+      if (res.profit_per_egg !== undefined) {
+        setProfitPerEgg(res.profit_per_egg);
+      }
+      showToast(`Bénéfice net mis à jour : +${Number(res.profit_per_egg).toFixed(2)} DH / œuf !`);
+      await loadInitialData();
+    } catch (err) {
+      showToast(err.message || 'Erreur lors de la mise à jour du bénéfice', 'error');
       throw err;
     }
   };
@@ -300,7 +313,8 @@ export default function App() {
               setClientModalOpen(true);
             }}
             onOpenPriceModal={() => setEggPriceModalOpen(true)}
-            onSavePrice={handleSaveEggPrice}
+            onOpenProfitModal={() => setProfitModalOpen(true)}
+            onSaveProfit={handleSaveProfit}
           />
         )}
 
@@ -468,13 +482,20 @@ export default function App() {
         }}
       />
 
-      {/* Modal Changement Prix du Jour des Œufs et Marge de Bénéfice */}
+      {/* Modal Changement Prix de Vente des Œufs (Prix uniquement) */}
       <EggPriceModal
         isOpen={eggPriceModalOpen}
         onClose={() => setEggPriceModalOpen(false)}
         currentPrice={currentEggPrice}
-        currentProfitPerEgg={profitPerEgg}
         onSavePrice={handleSaveEggPrice}
+      />
+
+      {/* Modal Changement Marge de Bénéfice Net par Œuf (Bénéfice uniquement) */}
+      <ProfitModal
+        isOpen={profitModalOpen}
+        onClose={() => setProfitModalOpen(false)}
+        currentProfitPerEgg={profitPerEgg}
+        onSaveProfit={handleSaveProfit}
       />
 
       {/* Modal Sauvegarde & Restauration (Export / Import) */}

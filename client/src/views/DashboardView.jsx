@@ -11,7 +11,8 @@ export default function DashboardView({
   onOpenStockModal, 
   onOpenClientModal,
   onOpenPriceModal,
-  onSavePrice
+  onOpenProfitModal,
+  onSaveProfit
 }) {
   const { t } = useLanguage();
   if (!dashboardData) return null;
@@ -225,7 +226,7 @@ export default function DashboardView({
           </div>
 
           <button
-            onClick={onOpenPriceModal}
+            onClick={onOpenProfitModal}
             className="py-3 px-5 bg-white text-emerald-900 font-black text-sm sm:text-base rounded-2xl shadow-md hover:bg-emerald-50 active:scale-95 transition flex items-center space-x-1.5 rtl:space-x-reverse shrink-0 cursor-pointer"
           >
             <span className="text-lg">✏️</span>
@@ -243,14 +244,12 @@ export default function DashboardView({
               <button
                 key={preset}
                 onClick={async () => {
-                  if (onSavePrice) {
-                    await onSavePrice({
-                      price: currentSellPrice,
-                      profit_per_egg: parseFloat(preset),
-                      update_all_clients: false
+                  if (onSaveProfit) {
+                    await onSaveProfit({
+                      profit_per_egg: parseFloat(preset)
                     });
-                  } else if (onOpenPriceModal) {
-                    onOpenPriceModal();
+                  } else if (onOpenProfitModal) {
+                    onOpenProfitModal();
                   }
                 }}
                 className={`py-2.5 text-sm sm:text-base font-black rounded-xl transition active:scale-95 border-2 ${

@@ -946,28 +946,32 @@ export const localStorageApi = {
 
   updateEggPrice: async (data) => {
     initStorage();
-    const numPrice = parseFloat(data.price);
-    if (isNaN(numPrice) || numPrice <= 0) throw new Error("Le prix doit être un nombre positif");
-
-    const roundedPrice = Math.round(numPrice * 100) / 100;
-    const plateauPrice = Math.round(roundedPrice * 30 * 100) / 100;
-
     const settings = getLocal(STORAGE_KEYS.SETTINGS, {});
-    settings.current_egg_price = roundedPrice;
 
-    if (data.profit_per_egg !== undefined && !isNaN(parseFloat(data.profit_per_egg))) {
-      settings.profit_per_egg = Math.round(parseFloat(data.profit_per_egg) * 100) / 100;
-    }
-    setLocal(STORAGE_KEYS.SETTINGS, settings);
+    let roundedPrice = settings.current_egg_price ? parseFloat(settings.current_egg_price) : 1.35;
+    if (data.price !== undefined) {
+      const numPrice = parseFloat(data.price);
+      if (isNaN(numPrice) || numPrice <= 0) throw new Error("Le prix doit être un nombre positif");
+      roundedPrice = Math.round(numPrice * 100) / 100;
+      settings.current_egg_price = roundedPrice;
 
-    if (data.update_all_clients) {
-      const clients = getLocal(STORAGE_KEYS.CLIENTS, []);
-      for (const c of clients) {
-        c.default_price = roundedPrice;
+      if (data.update_all_clients) {
+        const clients = getLocal(STORAGE_KEYS.CLIENTS, []);
+        for (const c of clients) {
+          c.default_price = roundedPrice;
+        }
+        setLocal(STORAGE_KEYS.CLIENTS, clients);
       }
-      setLocal(STORAGE_KEYS.CLIENTS, clients);
     }
 
+    if (data.profit_per_egg !== undefined) {
+      const numProfit = parseFloat(data.profit_per_egg);
+      if (isNaN(numProfit) || numProfit < 0) throw new Error("Le bénéfice doit être un nombre positif ou nul");
+      settings.profit_per_egg = Math.round(numProfit * 100) / 100;
+    }
+
+    setLocal(STORAGE_KEYS.SETTINGS, settings);
+    const plateauPrice = Math.round(roundedPrice * 30 * 100) / 100;
     const currentProfit = settings.profit_per_egg !== undefined ? settings.profit_per_egg : 0.20;
 
     return {
@@ -975,7 +979,7 @@ export const localStorageApi = {
       price: roundedPrice,
       plateau_price: plateauPrice,
       profit_per_egg: currentProfit,
-      message: `Nouveau prix fixé à ${roundedPrice.toFixed(2)} DH/œuf (Bénéfice : ${currentProfit.toFixed(2)} DH/œuf)`
+      message: `Enregistré avec succès !`
     };
   },
 
