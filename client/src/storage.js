@@ -350,6 +350,9 @@ export const localStorageApi = {
       total_paid: bal.totalPaid,
       remaining_debt: bal.remainingDebt,
       today_visit_status: visitToday ? visitToday.status : 'not_scheduled',
+      sales: clientSales,
+      payments: clientPayments,
+      visits: clientVisits,
       sales_history: clientSales,
       payments_history: clientPayments,
       visits_history: clientVisits

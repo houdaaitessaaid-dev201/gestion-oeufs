@@ -22,14 +22,14 @@ export default function ClientDetailModal({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (clientId) {
+    if (clientId && isOpen) {
       setLoading(true);
       api.getClient(clientId)
         .then(setClient)
         .catch(console.error)
         .finally(() => setLoading(false));
     }
-  }, [clientId]);
+  }, [clientId, isOpen]);
 
   if (loading) {
     return (
@@ -48,6 +48,10 @@ export default function ClientDetailModal({
   const cleanPhone = (client.phone || '').replace(/[^0-9]/g, '');
   const cleanWhatsapp = (client.whatsapp || client.phone || '').replace(/[^0-9]/g, '');
   const mapsQuery = client.coordinates || encodeURIComponent(`${client.address || ''} ${client.name}`);
+
+  const salesList = client.sales || client.sales_history || [];
+  const paymentsList = client.payments || client.payments_history || [];
+  const visitsList = client.visits || client.visits_history || [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in">
@@ -156,7 +160,7 @@ export default function ClientDetailModal({
               activeTab === 'sales' ? 'border-amber-600 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 dark:text-slate-400'
             }`}
           >
-            {t('salesTab')} ({client.sales?.length || 0})
+            {t('salesTab')} ({salesList.length})
           </button>
           <button
             onClick={() => setActiveTab('payments')}
@@ -164,7 +168,7 @@ export default function ClientDetailModal({
               activeTab === 'payments' ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-500 dark:text-slate-400'
             }`}
           >
-            {t('paymentsTab')} ({client.payments?.length || 0})
+            {t('paymentsTab')} ({paymentsList.length})
           </button>
           <button
             onClick={() => setActiveTab('visits')}
@@ -172,24 +176,24 @@ export default function ClientDetailModal({
               activeTab === 'visits' ? 'border-sky-600 text-sky-600 dark:text-sky-400' : 'border-transparent text-slate-500 dark:text-slate-400'
             }`}
           >
-            {t('visitsTab')} ({client.visits?.length || 0})
+            {t('visitsTab')} ({visitsList.length})
           </button>
         </div>
 
         {/* History Content */}
         <div className="p-4 overflow-y-auto max-h-64 space-y-2 bg-slate-50 dark:bg-slate-950 flex-1">
           {activeTab === 'sales' && (
-            (client.sales && client.sales.length > 0) ? (
-              client.sales.map((s) => (
+            salesList.length > 0 ? (
+              salesList.map((s) => (
                 <div key={s.id} className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs space-y-1">
                   <div className="flex justify-between font-extrabold text-slate-900 dark:text-white">
-                    <span>{s.quantity} {t('eggs')} ({s.total_amount.toFixed(2)} {t('dh')})</span>
-                    <span className="text-slate-400 font-normal">{s.sale_date}</span>
+                    <span>{s.quantity} {t('eggs')} ({(Number(s.total_amount) || 0).toFixed(2)} {t('dh')})</span>
+                    <span className="text-slate-400 font-normal">{s.sale_date || s.created_at || ''}</span>
                   </div>
                   <div className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400">
-                    <span>{t('paidPart')} <b className="text-emerald-600 dark:text-emerald-400">{s.paid_amount.toFixed(2)} {t('dh')}</b></span>
-                    {s.remaining_amount > 0 && (
-                      <span className="text-rose-600 dark:text-rose-400 font-bold">{t('remainingPart')} {s.remaining_amount.toFixed(2)} {t('dh')}</span>
+                    <span>{t('paidPart')} <b className="text-emerald-600 dark:text-emerald-400">{(Number(s.paid_amount) || 0).toFixed(2)} {t('dh')}</b></span>
+                    {(Number(s.remaining_amount) || 0) > 0 && (
+                      <span className="text-rose-600 dark:text-rose-400 font-bold">{t('remainingPart')} {(Number(s.remaining_amount) || 0).toFixed(2)} {t('dh')}</span>
                     )}
                   </div>
                 </div>
@@ -198,15 +202,15 @@ export default function ClientDetailModal({
           )}
 
           {activeTab === 'payments' && (
-            (client.payments && client.payments.length > 0) ? (
-              client.payments.map((p) => (
+            paymentsList.length > 0 ? (
+              paymentsList.map((p) => (
                 <div key={p.id} className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
                   <div>
-                    <span className="font-extrabold text-emerald-700 dark:text-emerald-400 block">+{p.amount.toFixed(2)} {t('dh')}</span>
-                    <span className="text-[10px] text-slate-400">{p.payment_date}</span>
+                    <span className="font-extrabold text-emerald-700 dark:text-emerald-400 block">+{(Number(p.amount) || 0).toFixed(2)} {t('dh')}</span>
+                    <span className="text-[10px] text-slate-400">{p.payment_date || p.created_at || ''}</span>
                   </div>
                   <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-slate-700">
-                    {t('cash')}
+                    {p.payment_method === 'check' ? t('check') : p.payment_method === 'bankTransfer' ? t('bankTransfer') : t('cash')}
                   </span>
                 </div>
               ))
@@ -214,8 +218,8 @@ export default function ClientDetailModal({
           )}
 
           {activeTab === 'visits' && (
-            (client.visits && client.visits.length > 0) ? (
-              client.visits.map((v) => (
+            visitsList.length > 0 ? (
+              visitsList.map((v) => (
                 <div key={v.id} className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
                   <span className="font-bold text-slate-800 dark:text-slate-200">
                     {v.status === 'visited' ? `✅ ${t('visitedStatus')}` : `⏳ ${t('notVisitedStatus')}`}
