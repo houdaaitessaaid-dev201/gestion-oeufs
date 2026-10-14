@@ -10,7 +10,8 @@ export default function DashboardView({
   onNavigate, 
   onOpenStockModal, 
   onOpenClientModal,
-  onOpenPriceModal
+  onOpenPriceModal,
+  onSavePrice
 }) {
   const { t } = useLanguage();
   if (!dashboardData) return null;
@@ -75,39 +76,48 @@ export default function DashboardView({
         </div>
       </div>
 
-      {/* BLOC 2 : LE STOCK D'ŒUFS */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 transition-colors">
-        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
-          {t('availableStock')}
-        </span>
+      {/* BLOC 2 : LE STOCK D'ŒUFS (GRAND & CLAIR : ŒUFS + PLATEAUX) */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border-2 border-slate-200 dark:border-slate-800 shadow-md space-y-4 transition-colors">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            📦 {t('availableStock')}
+          </span>
+        </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-baseline space-x-1.5 rtl:space-x-reverse">
-            <span className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white">
-              {currentStock.toLocaleString('fr-FR')}
+        {/* 2 Grandes Cases : Nombre d'œufs et Nombre de Plateaux */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Nombre total d'œufs */}
+          <div className="bg-amber-50/80 dark:bg-slate-800 p-4 rounded-3xl border-2 border-amber-300 dark:border-slate-700 text-center shadow-xs">
+            <span className="text-xs font-black text-amber-900 dark:text-amber-300 uppercase tracking-wide block mb-1">
+              🥚 {t('eggs')}
             </span>
-            <span className="text-base font-extrabold text-amber-600 dark:text-amber-500">{t('eggs')}</span>
+            <div className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white leading-tight">
+              {currentStock.toLocaleString('fr-FR')}
+            </div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 block">
+              {t('stockInVan')}
+            </span>
           </div>
 
-          {/* Nombre de plateaux bien grand et visible */}
-          <div className="flex items-center space-x-1.5 rtl:space-x-reverse bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-300 dark:border-amber-700/80 px-3.5 py-1.5 rounded-2xl shadow-2xs">
-            <span className="text-xl">📦</span>
-            <span className="text-lg sm:text-xl font-black text-amber-950 dark:text-amber-200">
-              {Math.floor(currentStock / 30)} {t('plateaux')}
+          {/* Nombre de plateaux de 30 */}
+          <div className="bg-gradient-to-br from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700 p-4 rounded-3xl text-white text-center shadow-md">
+            <span className="text-xs font-black text-amber-100 uppercase tracking-wide block mb-1">
+              📦 {t('plateaux')} (30)
             </span>
-            {currentStock % 30 > 0 && (
-              <span className="text-xs font-extrabold text-amber-700 dark:text-amber-400">
-                (+{currentStock % 30})
-              </span>
-            )}
+            <div className="text-4xl sm:text-5xl font-black text-white leading-tight">
+              {Math.floor(currentStock / 30)}
+            </div>
+            <span className="text-[11px] font-black text-amber-100 mt-1 block">
+              {currentStock % 30 > 0 ? `+ ${currentStock % 30} ${t('eggs')}` : `${t('plateaux')} complets`}
+            </span>
           </div>
         </div>
 
         {/* Gros boutons faciles pour le stock */}
-        <div className="grid grid-cols-2 gap-2.5 pt-2">
+        <div className="grid grid-cols-2 gap-2.5 pt-1">
           <button
             onClick={() => onOpenStockModal('entry')}
-            className="flex items-center justify-center space-x-1.5 rtl:space-x-reverse py-3 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs rounded-xl shadow-xs transition"
+            className="flex items-center justify-center space-x-1.5 rtl:space-x-reverse py-3 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs sm:text-sm rounded-2xl shadow-xs transition cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>{t('quickAddStock')}</span>
@@ -115,7 +125,7 @@ export default function DashboardView({
 
           <button
             onClick={() => onOpenStockModal('damage')}
-            className="flex items-center justify-center space-x-1.5 rtl:space-x-reverse py-3 px-3 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 active:scale-95 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900 font-bold text-xs rounded-xl transition"
+            className="flex items-center justify-center space-x-1.5 rtl:space-x-reverse py-3 px-3 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 active:scale-95 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900 font-black text-xs sm:text-sm rounded-2xl transition cursor-pointer"
           >
             <AlertTriangle className="w-4 h-4 text-rose-500" />
             <span>{t('recordDamage')}</span>
@@ -125,53 +135,51 @@ export default function DashboardView({
         {/* Bouton rapide pour modifier/corriger le stock */}
         <button
           onClick={() => onOpenStockModal('adjust')}
-          className="w-full flex items-center justify-center space-x-1.5 rtl:space-x-reverse py-2.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 active:scale-95 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-xs rounded-xl transition"
+          className="w-full flex items-center justify-center space-x-1.5 rtl:space-x-reverse py-2.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 active:scale-95 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-extrabold text-xs sm:text-sm rounded-2xl transition cursor-pointer"
         >
           <span>✏️ {t('adjustStockBtn')}</span>
         </button>
       </div>
 
-      {/* BLOC 2 BIS : PRIX DU JOUR DES ŒUFS & MARGE */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 transition-colors">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            <span className="text-2xl">🏷️</span>
-            <div>
-              <h3 className="text-sm font-black text-slate-900 dark:text-white">
-                {t('eggPriceTodayTitle')}
-              </h3>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
-                {t('eggPriceTodaySub')}
-              </p>
-            </div>
+      {/* BLOC 3 : PRIX DU JOUR DES ŒUFS (GRANDE CARTE BIEN VISIBLE) */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border-2 border-amber-300 dark:border-slate-700 shadow-md space-y-4 transition-colors">
+        <div className="flex items-center space-x-2.5 rtl:space-x-reverse border-b border-slate-100 dark:border-slate-800 pb-2.5">
+          <span className="text-3xl">🏷️</span>
+          <div>
+            <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+              {t('eggPriceTodayTitle')}
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
+              {t('eggPriceTodaySub')}
+            </p>
           </div>
         </div>
 
         {/* 2 Grandes Cases : Prix par œuf et Prix par plateau */}
         <div className="grid grid-cols-2 gap-3">
           {/* Prix d'une pièce */}
-          <div className="bg-amber-50/70 dark:bg-slate-800/80 p-3.5 rounded-2xl border-2 border-amber-300 dark:border-slate-700">
-            <span className="text-[11px] font-bold text-amber-950 dark:text-amber-300 block mb-1 uppercase tracking-wide">
-              {t('unitPriceInputLabel')}
+          <div className="bg-amber-50 dark:bg-slate-800/80 p-4 rounded-3xl border-2 border-amber-300 dark:border-slate-700 text-center shadow-xs">
+            <span className="text-xs font-black text-amber-950 dark:text-amber-300 uppercase tracking-wider block mb-1">
+              🥚 {t('unitPriceInputLabel')}
             </span>
-            <div className="flex items-baseline space-x-1 rtl:space-x-reverse">
-              <span className="text-2xl sm:text-3xl font-black text-amber-950 dark:text-white">
+            <div className="flex items-baseline justify-center space-x-1 rtl:space-x-reverse">
+              <span className="text-4xl sm:text-5xl font-black text-amber-950 dark:text-white tracking-tight">
                 {(Number(currentSellPrice) || 1.35).toFixed(2)}
               </span>
-              <span className="text-xs font-black text-amber-800 dark:text-amber-400">{t('dh')} / {t('egg')}</span>
+              <span className="text-sm font-black text-amber-800 dark:text-amber-400">{t('dh')}</span>
             </div>
           </div>
 
-          {/* Prix du plateau */}
-          <div className="bg-amber-50/70 dark:bg-slate-800/80 p-3.5 rounded-2xl border-2 border-amber-300 dark:border-slate-700">
-            <span className="text-[11px] font-bold text-amber-950 dark:text-amber-300 block mb-1 uppercase tracking-wide">
-              {t('plateauPriceInputLabel')}
+          {/* Prix du plateau (30) */}
+          <div className="bg-amber-50 dark:bg-slate-800/80 p-4 rounded-3xl border-2 border-amber-300 dark:border-slate-700 text-center shadow-xs">
+            <span className="text-xs font-black text-amber-950 dark:text-amber-300 uppercase tracking-wider block mb-1">
+              📦 {t('plateauPriceInputLabel')}
             </span>
-            <div className="flex items-baseline space-x-1 rtl:space-x-reverse">
-              <span className="text-2xl sm:text-3xl font-black text-amber-950 dark:text-white">
+            <div className="flex items-baseline justify-center space-x-1 rtl:space-x-reverse">
+              <span className="text-4xl sm:text-5xl font-black text-amber-950 dark:text-white tracking-tight">
                 {((Number(currentSellPrice) || 1.35) * 30).toFixed(2)}
               </span>
-              <span className="text-xs font-black text-amber-800 dark:text-amber-400">{t('dh')}</span>
+              <span className="text-sm font-black text-amber-800 dark:text-amber-400">{t('dh')}</span>
             </div>
           </div>
         </div>
@@ -179,71 +187,118 @@ export default function DashboardView({
         {/* Gros bouton bien visible pour modifier le prix du jour */}
         <button
           onClick={onOpenPriceModal}
-          className="w-full flex items-center justify-center space-x-2 rtl:space-x-reverse py-3 px-4 bg-amber-500 hover:bg-amber-600 active:scale-98 text-white font-black text-sm rounded-2xl shadow-xs transition cursor-pointer"
+          className="w-full flex items-center justify-center space-x-2 rtl:space-x-reverse py-3.5 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:scale-98 text-white font-black text-base sm:text-lg rounded-2xl shadow-md transition cursor-pointer"
         >
-          <span className="text-base">✏️</span>
-          <span>{t('editPriceAndProfitBtn')}</span>
+          <span className="text-xl">✏️</span>
+          <span>{t('editPriceBtn')}</span>
         </button>
       </div>
 
-      {/* BLOC 3 : BÉNÉFICE DU JOUR & FINANCES */}
-      <div className="space-y-3">
-        {/* CARTE PRINCIPALE : BÉNÉFICE DU JOUR (شحال ربحت اليوم) */}
-        <div className="bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 dark:from-emerald-700 dark:to-teal-900 rounded-3xl p-5 text-white shadow-md space-y-3.5 transition-all">
-          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            <div className="p-2 bg-white/20 rounded-xl">
-              <TrendingUp className="w-5 h-5 text-white stroke-[2.5]" />
-            </div>
-            <div>
-              <span className="text-xs font-black uppercase tracking-wider text-emerald-100 block">
-                {t('todayProfit')}
-              </span>
-              <span className="text-[11px] text-emerald-100/90 font-medium">
-                {t('todayProfitSub')}
-              </span>
-            </div>
+      {/* BLOC 4 : MON BÉNÉFICE NET PAR ŒUF (GRANDE CASE DÉDIÉE) */}
+      <div className="bg-gradient-to-br from-emerald-600 to-teal-700 dark:from-emerald-700 dark:to-teal-900 rounded-3xl p-5 text-white shadow-md space-y-4 transition-all">
+        <div className="flex items-center space-x-2.5 rtl:space-x-reverse border-b border-emerald-400/50 pb-2.5">
+          <span className="text-3xl">🎯</span>
+          <div>
+            <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-white">
+              {t('profitPerEggLabel')}
+            </h3>
+            <p className="text-xs text-emerald-100 font-semibold">
+              {t('profitPerEggHelp')}
+            </p>
           </div>
+        </div>
 
-          <div className="flex items-baseline space-x-2 rtl:space-x-reverse my-1">
-            <span className="text-4xl sm:text-5xl font-black tracking-tight">
-              +{todayProfit.toLocaleString('fr-FR')}
+        {/* Le grand chiffre du bénéfice par œuf */}
+        <div className="bg-white/15 dark:bg-black/20 backdrop-blur-xs p-4 rounded-3xl border-2 border-white/30 flex items-center justify-between shadow-inner">
+          <div>
+            <span className="text-xs uppercase font-extrabold text-emerald-100 block">
+              ربحي الصافي في كل بيضة
             </span>
-            <span className="text-xl font-black text-emerald-100">{t('dh')}</span>
+            <div className="flex items-baseline space-x-2 rtl:space-x-reverse mt-1">
+              <span className="text-5xl sm:text-6xl font-black tracking-tight text-white">
+                +{Number(profitPerEgg !== undefined ? profitPerEgg : 0.20).toFixed(2)}
+              </span>
+              <span className="text-lg sm:text-xl font-black text-emerald-100">
+                {t('dh')} / {t('egg')}
+              </span>
+            </div>
           </div>
 
-          {/* Grande case bien visible pour modifier le bénéfice par œuf */}
-          <div 
+          <button
             onClick={onOpenPriceModal}
-            className="bg-white/20 hover:bg-white/30 active:scale-98 p-3.5 rounded-2xl flex items-center justify-between text-white border border-white/25 transition cursor-pointer shadow-2xs"
+            className="py-3 px-5 bg-white text-emerald-900 font-black text-sm sm:text-base rounded-2xl shadow-md hover:bg-emerald-50 active:scale-95 transition flex items-center space-x-1.5 rtl:space-x-reverse shrink-0 cursor-pointer"
           >
-            <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
-              <span className="text-2xl">🎯</span>
-              <div>
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-100 block">
-                  {t('profitPerEggLabel')}
-                </span>
-                <span className="text-base sm:text-lg font-black text-white">
-                  +{Number(profitPerEgg !== undefined ? profitPerEgg : 0.20).toFixed(2)} {t('dh')} / {t('egg')}
-                </span>
-              </div>
-            </div>
-            <div className="px-3.5 py-2 bg-white text-emerald-800 rounded-xl text-xs font-black shadow-xs flex items-center space-x-1.5 rtl:space-x-reverse shrink-0">
-              <span>✏️</span>
-              <span>{t('modify')}</span>
-            </div>
-          </div>
+            <span className="text-lg">✏️</span>
+            <span>{t('modify')}</span>
+          </button>
+        </div>
 
-          <div className="pt-2.5 border-t border-emerald-400/40 flex items-center justify-between text-xs text-emerald-100 font-semibold">
-            <span>
-              📦 {paidEggsToday.toLocaleString('fr-FR')} {t('eggsPaid')} (~{Math.floor(paidEggsToday / 30)} {t('plateaux')})
-              {eggsDistributedToday > paidEggsToday && (
-                <span className="opacity-80 text-[11px] font-normal"> ({eggsDistributedToday - paidEggsToday} {t('onCredit')})</span>
-              )}
+        {/* Raccourcis de sélection directe du bénéfice en 1 clic */}
+        <div>
+          <span className="text-xs font-black text-emerald-100 block mb-2">
+            {t('quickProfitPresets')}
+          </span>
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+            {['0.10', '0.15', '0.20', '0.25', '0.30'].map((preset) => (
+              <button
+                key={preset}
+                onClick={async () => {
+                  if (onSavePrice) {
+                    await onSavePrice({
+                      price: currentSellPrice,
+                      profit_per_egg: parseFloat(preset),
+                      update_all_clients: false
+                    });
+                  } else if (onOpenPriceModal) {
+                    onOpenPriceModal();
+                  }
+                }}
+                className={`py-2.5 text-sm sm:text-base font-black rounded-xl transition active:scale-95 border-2 ${
+                  Number(profitPerEgg).toFixed(2) === parseFloat(preset).toFixed(2)
+                    ? 'bg-white text-emerald-950 border-white shadow-md scale-105'
+                    : 'bg-emerald-800/60 text-white border-emerald-400/50 hover:bg-emerald-700'
+                }`}
+              >
+                +{preset}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* BLOC 5 : BÉNÉFICE DU JOUR (شحال ربحت اليوم) */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border-2 border-emerald-400 dark:border-emerald-700 shadow-md space-y-3 transition-all">
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+          <div className="p-2.5 bg-emerald-100 dark:bg-emerald-950/60 rounded-2xl text-emerald-700 dark:text-emerald-300">
+            <TrendingUp className="w-6 h-6 stroke-[3]" />
+          </div>
+          <div>
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+              {t('todayProfit')}
             </span>
-            <span>
-              {t('totalSalesTodayLabel')} : {totalSalesToday.toLocaleString('fr-FR')} {t('dh')}
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+              {t('todayProfitSub')}
             </span>
           </div>
+        </div>
+
+        <div className="flex items-baseline space-x-2 rtl:space-x-reverse my-2">
+          <span className="text-5xl sm:text-6xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+            +{todayProfit.toLocaleString('fr-FR')}
+          </span>
+          <span className="text-2xl font-black text-emerald-700 dark:text-emerald-500">{t('dh')}</span>
+        </div>
+
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
+          <span className="text-slate-800 dark:text-slate-200">
+            📦 {paidEggsToday.toLocaleString('fr-FR')} {t('eggsPaid')} (~{Math.floor(paidEggsToday / 30)} {t('plateaux')})
+            {eggsDistributedToday > paidEggsToday && (
+              <span className="text-rose-600 dark:text-rose-400 font-extrabold"> ({eggsDistributedToday - paidEggsToday} {t('onCredit')})</span>
+            )}
+          </span>
+          <span className="text-emerald-700 dark:text-emerald-400 font-black">
+            {t('totalSalesTodayLabel')} : {totalSalesToday.toLocaleString('fr-FR')} {t('dh')}
+          </span>
         </div>
       </div>
 

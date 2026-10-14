@@ -300,6 +300,7 @@ export default function App() {
               setClientModalOpen(true);
             }}
             onOpenPriceModal={() => setEggPriceModalOpen(true)}
+            onSavePrice={handleSaveEggPrice}
           />
         )}
 

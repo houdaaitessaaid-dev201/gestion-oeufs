@@ -232,6 +232,9 @@ export const translations = {
     eggPriceTodaySub: "Prix de vente et marge par œuf",
     plateauPriceLabel: "Prix du plateau (30 œufs)",
     editPriceAndProfitBtn: "✏️ Modifier le Prix et le Bénéfice",
+    editPriceBtn: "✏️ Modifier le Prix de Vente",
+    editProfitBtn: "✏️ Modifier mon Bénéfice",
+    quickProfitPresets: "Choisir un bénéfice rapide par œuf :",
     modify: "Modifier"
   },
 
@@ -468,6 +471,9 @@ export const translations = {
     eggPriceTodaySub: "سعر بيع البيضة والبلاطو ونسبة ربحك",
     plateauPriceLabel: "ثمن البلاطو (30 بيضة)",
     editPriceAndProfitBtn: "✏️ تعديل ثمن البيض والربح الصافي",
+    editPriceBtn: "✏️ تعديل ثمن البيع",
+    editProfitBtn: "✏️ تعديل ربحي الصافي",
+    quickProfitPresets: "تغيير سريع لربحك الصافي في كل بيضة :",
     modify: "تعديل"
   }
 };
