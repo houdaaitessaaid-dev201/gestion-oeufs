@@ -195,107 +195,62 @@ export default function DashboardView({
         </button>
       </div>
 
-      {/* BLOC 4 : MON BÉNÉFICE NET PAR ŒUF (GRANDE CASE DÉDIÉE) */}
-      <div className="bg-gradient-to-br from-emerald-600 to-teal-700 dark:from-emerald-700 dark:to-teal-900 rounded-3xl p-5 text-white shadow-md space-y-4 transition-all">
-        <div className="flex items-center space-x-2.5 rtl:space-x-reverse border-b border-emerald-400/50 pb-2.5">
-          <span className="text-3xl">🎯</span>
-          <div>
-            <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-white">
-              {t('profitPerEggLabel')}
-            </h3>
-            <p className="text-xs text-emerald-100 font-semibold">
-              {t('profitPerEggHelp')}
-            </p>
-          </div>
-        </div>
-
-        {/* Le grand chiffre du bénéfice par œuf */}
-        <div className="bg-white/15 dark:bg-black/20 backdrop-blur-xs p-4 rounded-3xl border-2 border-white/30 flex items-center justify-between shadow-inner">
-          <div>
-            <span className="text-xs uppercase font-extrabold text-emerald-100 block">
-              ربحي الصافي في كل بيضة
-            </span>
-            <div className="flex items-baseline space-x-2 rtl:space-x-reverse mt-1">
-              <span className="text-5xl sm:text-6xl font-black tracking-tight text-white">
-                +{Number(profitPerEgg !== undefined ? profitPerEgg : 0.20).toFixed(2)}
-              </span>
-              <span className="text-lg sm:text-xl font-black text-emerald-100">
-                {t('dh')} / {t('egg')}
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={onOpenProfitModal}
-            className="py-3 px-5 bg-white text-emerald-900 font-black text-sm sm:text-base rounded-2xl shadow-md hover:bg-emerald-50 active:scale-95 transition flex items-center space-x-1.5 rtl:space-x-reverse shrink-0 cursor-pointer"
-          >
-            <span className="text-lg">✏️</span>
-            <span>{t('modify')}</span>
-          </button>
-        </div>
-
-        {/* Raccourcis de sélection directe du bénéfice en 1 clic */}
-        <div>
-          <span className="text-xs font-black text-emerald-100 block mb-2">
-            {t('quickProfitPresets')}
-          </span>
-          <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-            {['0.10', '0.15', '0.20', '0.25', '0.30'].map((preset) => (
-              <button
-                key={preset}
-                onClick={async () => {
-                  if (onSaveProfit) {
-                    await onSaveProfit({
-                      profit_per_egg: parseFloat(preset)
-                    });
-                  } else if (onOpenProfitModal) {
-                    onOpenProfitModal();
-                  }
-                }}
-                className={`py-2.5 text-sm sm:text-base font-black rounded-xl transition active:scale-95 border-2 ${
-                  Number(profitPerEgg).toFixed(2) === parseFloat(preset).toFixed(2)
-                    ? 'bg-white text-emerald-950 border-white shadow-md scale-105'
-                    : 'bg-emerald-800/60 text-white border-emerald-400/50 hover:bg-emerald-700'
-                }`}
-              >
-                +{preset}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* BLOC 5 : BÉNÉFICE DU JOUR (شحال ربحت اليوم) */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border-2 border-emerald-400 dark:border-emerald-700 shadow-md space-y-3 transition-all">
-        <div className="flex items-center space-x-2 rtl:space-x-reverse">
-          <div className="p-2.5 bg-emerald-100 dark:bg-emerald-950/60 rounded-2xl text-emerald-700 dark:text-emerald-300">
+      {/* BLOC 4 : BÉNÉFICE DU JOUR & MARGE PAR ŒUF (F NAFS L-KHANA) */}
+      <div className="bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 dark:from-emerald-700 dark:to-teal-900 rounded-3xl p-5 text-white shadow-md space-y-4 transition-all">
+        {/* En-tête : Bénéfice du jour */}
+        <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
+          <div className="p-2.5 bg-white/20 rounded-2xl text-white">
             <TrendingUp className="w-6 h-6 stroke-[3]" />
           </div>
           <div>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+            <span className="text-xs font-black uppercase tracking-wider text-emerald-100 block">
               {t('todayProfit')}
             </span>
-            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+            <span className="text-xs text-emerald-100/90 font-medium">
               {t('todayProfitSub')}
             </span>
           </div>
         </div>
 
-        <div className="flex items-baseline space-x-2 rtl:space-x-reverse my-2">
-          <span className="text-5xl sm:text-6xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+        {/* Grand Chiffre : Bénéfice du Jour */}
+        <div className="flex items-baseline space-x-2 rtl:space-x-reverse my-1">
+          <span className="text-5xl sm:text-6xl font-black tracking-tight text-white">
             +{todayProfit.toLocaleString('fr-FR')}
           </span>
-          <span className="text-2xl font-black text-emerald-700 dark:text-emerald-500">{t('dh')}</span>
+          <span className="text-2xl font-black text-emerald-100">{t('dh')}</span>
         </div>
 
-        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
-          <span className="text-slate-800 dark:text-slate-200">
+        {/* Case bien visible pour modifier le bénéfice net par œuf (f nafs l-khana, kbira o wadha) */}
+        <div 
+          onClick={onOpenProfitModal}
+          className="bg-white/15 hover:bg-white/25 active:scale-98 p-4 rounded-2xl flex items-center justify-between text-white border-2 border-white/30 transition cursor-pointer shadow-inner"
+        >
+          <div className="flex items-center space-x-3 rtl:space-x-reverse">
+            <span className="text-3xl">🎯</span>
+            <div>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-100 block">
+                {t('profitPerEggLabel')}
+              </span>
+              <span className="text-2xl sm:text-3xl font-black text-white">
+                +{Number(profitPerEgg !== undefined ? profitPerEgg : 0.20).toFixed(2)} {t('dh')} <span className="text-xs font-bold text-emerald-100">/ {t('egg')}</span>
+              </span>
+            </div>
+          </div>
+          <div className="py-2.5 px-4 bg-white text-emerald-900 rounded-xl text-xs sm:text-sm font-black shadow-md flex items-center space-x-1.5 rtl:space-x-reverse shrink-0">
+            <span>✏️</span>
+            <span>{t('modify')}</span>
+          </div>
+        </div>
+
+        {/* Détails bas de carte : œufs payés et ventes */}
+        <div className="pt-2 border-t border-emerald-400/40 flex items-center justify-between text-xs text-emerald-100 font-semibold">
+          <span>
             📦 {paidEggsToday.toLocaleString('fr-FR')} {t('eggsPaid')} (~{Math.floor(paidEggsToday / 30)} {t('plateaux')})
             {eggsDistributedToday > paidEggsToday && (
-              <span className="text-rose-600 dark:text-rose-400 font-extrabold"> ({eggsDistributedToday - paidEggsToday} {t('onCredit')})</span>
+              <span className="opacity-80 text-[11px] font-normal"> ({eggsDistributedToday - paidEggsToday} {t('onCredit')})</span>
             )}
           </span>
-          <span className="text-emerald-700 dark:text-emerald-400 font-black">
+          <span className="font-bold">
             {t('totalSalesTodayLabel')} : {totalSalesToday.toLocaleString('fr-FR')} {t('dh')}
           </span>
         </div>

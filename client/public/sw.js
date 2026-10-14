@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gestion-oeufs-v6';
+const CACHE_NAME = 'gestion-oeufs-v7';
 
 // Fichiers à pré-mettre en cache
 const PRECACHE_ASSETS = [
