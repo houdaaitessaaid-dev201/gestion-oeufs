@@ -66,6 +66,7 @@ export default function DashboardView({
         <div className="flex items-center justify-between pt-2 border-t border-amber-400/50">
           <span className="text-xs font-semibold text-amber-100">
             {eggsDistributedToday} {t('eggsDistributedToday')}
+            {eggsDistributedToday > 0 && ` (~${Math.floor(eggsDistributedToday / 30)} ${t('plateaux')})`}
           </span>
           <div className="flex items-center text-xs font-bold text-white group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition space-x-1 rtl:space-x-reverse">
             <span>{t('openTour')}</span>
@@ -76,16 +77,30 @@ export default function DashboardView({
 
       {/* BLOC 2 : LE STOCK D'ŒUFS */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 transition-colors">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('availableStock')}</span>
-          <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">~{Math.floor(currentStock / 30)} {t('plateaux')}</span>
-        </div>
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+          {t('availableStock')}
+        </span>
 
-        <div className="flex items-baseline space-x-2 rtl:space-x-reverse">
-          <span className="text-4xl font-black text-slate-900 dark:text-white">
-            {currentStock.toLocaleString('fr-FR')}
-          </span>
-          <span className="text-base font-bold text-amber-600 dark:text-amber-500">{t('eggs')}</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-baseline space-x-1.5 rtl:space-x-reverse">
+            <span className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white">
+              {currentStock.toLocaleString('fr-FR')}
+            </span>
+            <span className="text-base font-extrabold text-amber-600 dark:text-amber-500">{t('eggs')}</span>
+          </div>
+
+          {/* Nombre de plateaux bien grand et visible */}
+          <div className="flex items-center space-x-1.5 rtl:space-x-reverse bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-300 dark:border-amber-700/80 px-3.5 py-1.5 rounded-2xl shadow-2xs">
+            <span className="text-xl">📦</span>
+            <span className="text-lg sm:text-xl font-black text-amber-950 dark:text-amber-200">
+              {Math.floor(currentStock / 30)} {t('plateaux')}
+            </span>
+            {currentStock % 30 > 0 && (
+              <span className="text-xs font-extrabold text-amber-700 dark:text-amber-400">
+                (+{currentStock % 30})
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Gros boutons faciles pour le stock */}
@@ -116,52 +131,111 @@ export default function DashboardView({
         </button>
       </div>
 
+      {/* BLOC 2 BIS : PRIX DU JOUR DES ŒUFS & MARGE */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 transition-colors">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <span className="text-2xl">🏷️</span>
+            <div>
+              <h3 className="text-sm font-black text-slate-900 dark:text-white">
+                {t('eggPriceTodayTitle')}
+              </h3>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                {t('eggPriceTodaySub')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 2 Grandes Cases : Prix par œuf et Prix par plateau */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Prix d'une pièce */}
+          <div className="bg-amber-50/70 dark:bg-slate-800/80 p-3.5 rounded-2xl border-2 border-amber-300 dark:border-slate-700">
+            <span className="text-[11px] font-bold text-amber-950 dark:text-amber-300 block mb-1 uppercase tracking-wide">
+              {t('unitPriceInputLabel')}
+            </span>
+            <div className="flex items-baseline space-x-1 rtl:space-x-reverse">
+              <span className="text-2xl sm:text-3xl font-black text-amber-950 dark:text-white">
+                {(Number(currentSellPrice) || 1.35).toFixed(2)}
+              </span>
+              <span className="text-xs font-black text-amber-800 dark:text-amber-400">{t('dh')} / {t('egg')}</span>
+            </div>
+          </div>
+
+          {/* Prix du plateau */}
+          <div className="bg-amber-50/70 dark:bg-slate-800/80 p-3.5 rounded-2xl border-2 border-amber-300 dark:border-slate-700">
+            <span className="text-[11px] font-bold text-amber-950 dark:text-amber-300 block mb-1 uppercase tracking-wide">
+              {t('plateauPriceInputLabel')}
+            </span>
+            <div className="flex items-baseline space-x-1 rtl:space-x-reverse">
+              <span className="text-2xl sm:text-3xl font-black text-amber-950 dark:text-white">
+                {((Number(currentSellPrice) || 1.35) * 30).toFixed(2)}
+              </span>
+              <span className="text-xs font-black text-amber-800 dark:text-amber-400">{t('dh')}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Gros bouton bien visible pour modifier le prix du jour */}
+        <button
+          onClick={onOpenPriceModal}
+          className="w-full flex items-center justify-center space-x-2 rtl:space-x-reverse py-3 px-4 bg-amber-500 hover:bg-amber-600 active:scale-98 text-white font-black text-sm rounded-2xl shadow-xs transition cursor-pointer"
+        >
+          <span className="text-base">✏️</span>
+          <span>{t('editPriceAndProfitBtn')}</span>
+        </button>
+      </div>
+
       {/* BLOC 3 : BÉNÉFICE DU JOUR & FINANCES */}
       <div className="space-y-3">
         {/* CARTE PRINCIPALE : BÉNÉFICE DU JOUR (شحال ربحت اليوم) */}
-        <div className="bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 dark:from-emerald-700 dark:to-teal-900 rounded-3xl p-5 text-white shadow-md space-y-3 transition-all">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <div className="p-2 bg-white/20 rounded-xl">
-                <TrendingUp className="w-5 h-5 text-white stroke-[2.5]" />
-              </div>
-              <div>
-                <span className="text-xs font-black uppercase tracking-wider text-emerald-100 block">
-                  {t('todayProfit')}
-                </span>
-                <span className="text-[11px] text-emerald-100/90 font-medium">
-                  {t('todayProfitSub')}
-                </span>
-              </div>
+        <div className="bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 dark:from-emerald-700 dark:to-teal-900 rounded-3xl p-5 text-white shadow-md space-y-3.5 transition-all">
+          <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <div className="p-2 bg-white/20 rounded-xl">
+              <TrendingUp className="w-5 h-5 text-white stroke-[2.5]" />
             </div>
-
-            {/* Badge de marge par œuf cliquable pour la modifier facilement */}
-            {onOpenPriceModal ? (
-              <button
-                onClick={onOpenPriceModal}
-                className="text-xs font-black bg-white/20 hover:bg-white/30 active:scale-95 px-3 py-1 rounded-full text-white transition flex items-center space-x-1 rtl:space-x-reverse cursor-pointer border border-white/20"
-                title="Modifier mon bénéfice par œuf"
-              >
-                <span>🎯 {profitPerEgg !== undefined ? Number(profitPerEgg).toFixed(2) : '0.20'} DH / {t('egg')}</span>
-                <span className="text-[10px] opacity-80">✏️</span>
-              </button>
-            ) : (
-              <span className="text-xs font-black bg-white/20 px-3 py-1 rounded-full text-white">
-                🎯 {profitPerEgg !== undefined ? Number(profitPerEgg).toFixed(2) : '0.20'} DH / {t('egg')}
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider text-emerald-100 block">
+                {t('todayProfit')}
               </span>
-            )}
+              <span className="text-[11px] text-emerald-100/90 font-medium">
+                {t('todayProfitSub')}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-baseline space-x-2 rtl:space-x-reverse my-1">
-            <span className="text-4xl font-black tracking-tight">
+            <span className="text-4xl sm:text-5xl font-black tracking-tight">
               +{todayProfit.toLocaleString('fr-FR')}
             </span>
             <span className="text-xl font-black text-emerald-100">{t('dh')}</span>
           </div>
 
+          {/* Grande case bien visible pour modifier le bénéfice par œuf */}
+          <div 
+            onClick={onOpenPriceModal}
+            className="bg-white/20 hover:bg-white/30 active:scale-98 p-3.5 rounded-2xl flex items-center justify-between text-white border border-white/25 transition cursor-pointer shadow-2xs"
+          >
+            <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
+              <span className="text-2xl">🎯</span>
+              <div>
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-100 block">
+                  {t('profitPerEggLabel')}
+                </span>
+                <span className="text-base sm:text-lg font-black text-white">
+                  +{Number(profitPerEgg !== undefined ? profitPerEgg : 0.20).toFixed(2)} {t('dh')} / {t('egg')}
+                </span>
+              </div>
+            </div>
+            <div className="px-3.5 py-2 bg-white text-emerald-800 rounded-xl text-xs font-black shadow-xs flex items-center space-x-1.5 rtl:space-x-reverse shrink-0">
+              <span>✏️</span>
+              <span>{t('modify')}</span>
+            </div>
+          </div>
+
           <div className="pt-2.5 border-t border-emerald-400/40 flex items-center justify-between text-xs text-emerald-100 font-semibold">
             <span>
-              📦 {paidEggsToday.toLocaleString('fr-FR')} {t('eggsPaid')}
+              📦 {paidEggsToday.toLocaleString('fr-FR')} {t('eggsPaid')} (~{Math.floor(paidEggsToday / 30)} {t('plateaux')})
               {eggsDistributedToday > paidEggsToday && (
                 <span className="opacity-80 text-[11px] font-normal"> ({eggsDistributedToday - paidEggsToday} {t('onCredit')})</span>
               )}

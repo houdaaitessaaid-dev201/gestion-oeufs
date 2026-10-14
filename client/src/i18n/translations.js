@@ -227,7 +227,12 @@ export const translations = {
     profitPerEggLabel: "Mon bénéfice net par œuf (DH)",
     profitPerEggHelp: "Multiplié par les œufs vendus pour calculer le Bénéfice du jour",
     updateClientsDefault: "Appliquer ce tarif aux futures commandes",
-    savePriceBtn: "Enregistrer"
+    savePriceBtn: "Enregistrer",
+    eggPriceTodayTitle: "Tarif du Jour des Œufs",
+    eggPriceTodaySub: "Prix de vente et marge par œuf",
+    plateauPriceLabel: "Prix du plateau (30 œufs)",
+    editPriceAndProfitBtn: "✏️ Modifier le Prix et le Bénéfice",
+    modify: "Modifier"
   },
 
   ar: {
@@ -458,6 +463,11 @@ export const translations = {
     profitPerEggLabel: "ربحي الصافي في كل بيضة (درهم)",
     profitPerEggHelp: "يُضرب في عدد البيض المباع لحساب مدخولك وأرباحك اليومية الصافية",
     updateClientsDefault: "تطبيق هذا الثمن على الطلبيات القادمة",
-    savePriceBtn: "حفظ"
+    savePriceBtn: "حفظ",
+    eggPriceTodayTitle: "ثمن البيض اليوم والربح الصافي",
+    eggPriceTodaySub: "سعر بيع البيضة والبلاطو ونسبة ربحك",
+    plateauPriceLabel: "ثمن البلاطو (30 بيضة)",
+    editPriceAndProfitBtn: "✏️ تعديل ثمن البيض والربح الصافي",
+    modify: "تعديل"
   }
 };

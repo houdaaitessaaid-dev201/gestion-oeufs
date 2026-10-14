@@ -117,90 +117,90 @@ export default function EggPriceModal({
             </div>
           )}
 
-          {/* Saisie Prix unitaire et plateau */}
+          {/* Saisie Prix unitaire et plateau - Grandes cases bien visibles */}
           <div className="grid grid-cols-2 gap-3">
             {/* Prix par œuf */}
-            <div className="bg-amber-50/70 dark:bg-slate-800/80 p-3 rounded-2xl border-2 border-amber-300 dark:border-slate-700">
-              <label className="block text-[11px] font-black text-amber-950 dark:text-amber-300 uppercase tracking-wider mb-1">
+            <div className="bg-amber-50/80 dark:bg-slate-800 p-4 rounded-3xl border-2 border-amber-300 dark:border-slate-700 shadow-2xs">
+              <label className="block text-xs font-black text-amber-950 dark:text-amber-300 uppercase tracking-wider mb-1.5">
                 {t('unitPriceInputLabel')}
               </label>
-              <div className="flex items-center space-x-1 rtl:space-x-reverse">
+              <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
                 <input
                   type="number"
                   step="0.01"
                   min="0.10"
                   value={eggPrice}
                   onChange={(e) => handleEggPriceChange(e.target.value)}
-                  className="w-full text-2xl font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 py-1.5 px-2 rounded-xl border border-amber-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full text-3xl font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 py-2.5 px-3 rounded-2xl border-2 border-amber-400 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner"
                   placeholder="1.35"
                   required
                 />
-                <span className="text-xs font-black text-amber-900 dark:text-amber-400 shrink-0">{t('dh')}</span>
+                <span className="text-sm font-black text-amber-900 dark:text-amber-400 shrink-0">{t('dh')}</span>
               </div>
             </div>
 
             {/* Prix par plateau */}
-            <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
-              <label className="block text-[11px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-3xl border-2 border-slate-200 dark:border-slate-700 shadow-2xs">
+              <label className="block text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 {t('plateauPriceInputLabel')}
               </label>
-              <div className="flex items-center space-x-1 rtl:space-x-reverse">
+              <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
                 <input
                   type="number"
                   step="0.10"
                   min="3.00"
                   value={plateauPrice}
                   onChange={(e) => handlePlateauPriceChange(e.target.value)}
-                  className="w-full text-2xl font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 py-1.5 px-2 rounded-xl border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full text-3xl font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 py-2.5 px-3 rounded-2xl border-2 border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner"
                   placeholder="40.50"
                   required
                 />
-                <span className="text-xs font-black text-slate-600 dark:text-slate-400 shrink-0">{t('dh')}</span>
+                <span className="text-sm font-black text-slate-600 dark:text-slate-400 shrink-0">{t('dh')}</span>
               </div>
             </div>
           </div>
 
-          {/* Raccourcis d'ajustement rapide */}
+          {/* Raccourcis d'ajustement rapide - Grands boutons */}
           <div>
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-4 gap-2">
               <button
                 type="button"
                 onClick={() => adjustPrice(-0.10)}
-                className="py-1.5 text-xs font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition active:scale-95"
+                className="py-2.5 text-sm font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl transition active:scale-95 border border-slate-200 dark:border-slate-700 shadow-2xs"
               >
                 - 0.10
               </button>
               <button
                 type="button"
                 onClick={() => adjustPrice(-0.05)}
-                className="py-1.5 text-xs font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition active:scale-95"
+                className="py-2.5 text-sm font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl transition active:scale-95 border border-slate-200 dark:border-slate-700 shadow-2xs"
               >
                 - 0.05
               </button>
               <button
                 type="button"
                 onClick={() => adjustPrice(+0.05)}
-                className="py-1.5 text-xs font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition active:scale-95"
+                className="py-2.5 text-sm font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl transition active:scale-95 border border-slate-200 dark:border-slate-700 shadow-2xs"
               >
                 + 0.05
               </button>
               <button
                 type="button"
                 onClick={() => adjustPrice(+0.10)}
-                className="py-1.5 text-xs font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition active:scale-95"
+                className="py-2.5 text-sm font-black bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl transition active:scale-95 border border-slate-200 dark:border-slate-700 shadow-2xs"
               >
                 + 0.10
               </button>
             </div>
           </div>
 
-          {/* Marge bénéficiaire par œuf (Mon bénéfice net par œuf) */}
-          <div className="bg-emerald-50/70 dark:bg-emerald-950/20 p-3.5 rounded-2xl border-2 border-emerald-300 dark:border-emerald-800 space-y-2">
+          {/* Marge bénéficiaire par œuf (Mon bénéfice net par œuf) - Grande boîte bien visible */}
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 p-4 rounded-3xl border-2 border-emerald-400 dark:border-emerald-700 space-y-2.5 shadow-2xs">
             <div className="flex items-center justify-between">
-              <label className="block text-[11px] font-black text-emerald-950 dark:text-emerald-300 uppercase tracking-wider">
-                {t('profitPerEggLabel')}
+              <label className="block text-xs font-black text-emerald-950 dark:text-emerald-300 uppercase tracking-wider">
+                🎯 {t('profitPerEggLabel')}
               </label>
-              <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-lg border border-emerald-200 dark:border-emerald-700">
+              <span className="text-xs font-black text-emerald-800 dark:text-emerald-300 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-xl border border-emerald-200 dark:border-emerald-700 shadow-2xs">
                 ربحي الصافي
               </span>
             </div>
@@ -212,29 +212,29 @@ export default function EggPriceModal({
                 min="0.01"
                 value={profitPerEgg}
                 onChange={(e) => setProfitPerEgg(e.target.value)}
-                className="w-full text-2xl font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 py-1.5 px-3 rounded-xl border border-emerald-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full text-3xl font-black text-slate-900 dark:text-white bg-white dark:bg-slate-900 py-2.5 px-3 rounded-2xl border-2 border-emerald-400 dark:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-inner"
                 placeholder="0.20"
                 required
               />
-              <span className="text-xs font-black text-emerald-900 dark:text-emerald-300 shrink-0 whitespace-nowrap">
+              <span className="text-sm font-black text-emerald-900 dark:text-emerald-300 shrink-0 whitespace-nowrap">
                 {t('dh')} / {t('egg')}
               </span>
             </div>
 
-            <p className="text-[10px] text-emerald-800 dark:text-emerald-400 font-medium">
+            <p className="text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold">
               {t('profitPerEggHelp')}
             </p>
 
-            {/* Presets rapides de marge */}
-            <div className="flex items-center gap-1.5 pt-1">
+            {/* Presets rapides de marge - Grands boutons */}
+            <div className="flex items-center gap-2 pt-1">
               {['0.10', '0.15', '0.20', '0.25', '0.30'].map((preset) => (
                 <button
                   type="button"
                   key={preset}
                   onClick={() => setProfitPerEgg(preset)}
-                  className={`flex-1 py-1 text-xs font-black rounded-lg transition active:scale-95 border ${
+                  className={`flex-1 py-2 text-sm font-black rounded-xl transition active:scale-95 border ${
                     profitPerEgg === preset
-                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm scale-105'
                       : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-emerald-200 dark:border-slate-700 hover:bg-emerald-100/50'
                   }`}
                 >
