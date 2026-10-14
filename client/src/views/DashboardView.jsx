@@ -22,6 +22,7 @@ export default function DashboardView({
     totalPaidToday = 0,
     totalDebtToRecover = 0,
     eggsDistributedToday = 0,
+    paidEggsToday = 0,
     totalSalesToday = 0,
     todayProfit = 0,
     profitPerEgg = 0.20,
@@ -160,7 +161,10 @@ export default function DashboardView({
 
           <div className="pt-2.5 border-t border-emerald-400/40 flex items-center justify-between text-xs text-emerald-100 font-semibold">
             <span>
-              📦 {eggsDistributedToday.toLocaleString('fr-FR')} {t('eggsDistributedToday')}
+              📦 {paidEggsToday.toLocaleString('fr-FR')} {t('eggsPaid')}
+              {eggsDistributedToday > paidEggsToday && (
+                <span className="opacity-80 text-[11px] font-normal"> ({eggsDistributedToday - paidEggsToday} {t('onCredit')})</span>
+              )}
             </span>
             <span>
               {t('totalSalesTodayLabel')} : {totalSalesToday.toLocaleString('fr-FR')} {t('dh')}

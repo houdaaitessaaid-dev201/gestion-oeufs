@@ -138,13 +138,23 @@ export const localStorageApi = {
     const eggsDistributedToday = todaySales.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
     const totalSalesToday = Math.round(todaySales.reduce((sum, s) => sum + (Number(s.total_amount) || 0), 0) * 100) / 100;
 
-    // 6. Prix et Bénéfice du jour (calculé selon la marge nette par œuf choisie)
+    // 6. Prix et Bénéfice du jour
+    // Le bénéfice net ne compte QUE les ventes dont le paiement est totalement réglé (pas de crédit impayé)
     const currentSellPrice = parseFloat(settings.current_egg_price) || 1.35;
     const profitPerEgg = settings.profit_per_egg !== undefined && !isNaN(parseFloat(settings.profit_per_egg))
       ? parseFloat(settings.profit_per_egg)
       : 0.20;
 
-    const todayProfit = Math.max(0, Math.round((eggsDistributedToday * profitPerEgg) * 100) / 100);
+    // Ventes complétées aujourd'hui (payées en totalité à la livraison aujourd'hui, ou dont le crédit a été soldé aujourd'hui)
+    const fullyPaidTodaySales = sales.filter(s => {
+      const isPaid = (Number(s.remaining_amount) || 0) <= 0;
+      if (!isPaid) return false;
+      const paidDate = s.fully_paid_date || s.sale_date || s.created_at || '';
+      return paidDate.startsWith(today);
+    });
+
+    const paidEggsToday = fullyPaidTodaySales.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
+    const todayProfit = Math.max(0, Math.round((paidEggsToday * profitPerEgg) * 100) / 100);
 
     return {
       currentStock,
@@ -157,6 +167,7 @@ export const localStorageApi = {
       totalPaidToday,
       totalDebtToRecover,
       eggsDistributedToday,
+      paidEggsToday,
       totalSalesToday,
       todayProfit,
       profitPerEgg,
@@ -569,6 +580,7 @@ export const localStorageApi = {
     const visits = getLocal(STORAGE_KEYS.VISITS, []);
 
     // 1. Créer la vente
+    const isFullyPaid = remaining <= 0;
     const newSale = {
       id: nextId(sales),
       client_id: cId,
@@ -578,6 +590,7 @@ export const localStorageApi = {
       total_amount: totalAmount,
       paid_amount: paid,
       remaining_amount: remaining,
+      fully_paid_date: isFullyPaid ? nowStr : null,
       sale_date: nowStr,
       notes: data.notes || '',
       created_at: nowStr
@@ -708,6 +721,7 @@ export const localStorageApi = {
     if (!amount || amount <= 0) throw new Error("Le montant du règlement doit être supérieur à 0");
 
     const payments = getLocal(STORAGE_KEYS.PAYMENTS, []);
+    const sales = getLocal(STORAGE_KEYS.SALES, []);
     const nowStr = getNowIsoString();
 
     const newPayment = {
@@ -725,7 +739,28 @@ export const localStorageApi = {
     payments.push(newPayment);
     setLocal(STORAGE_KEYS.PAYMENTS, payments);
 
-    const bal = getClientBalance(cId, null, payments);
+    // Appliquer le règlement aux ventes impayées du client (FIFO - de la plus ancienne à la plus récente)
+    let unallocated = amount;
+    const clientUnpaidSales = sales
+      .filter(s => Number(s.client_id) === cId && (Number(s.remaining_amount) || 0) > 0)
+      .sort((a, b) => new Date(a.sale_date || a.created_at || 0) - new Date(b.sale_date || b.created_at || 0));
+
+    for (const s of clientUnpaidSales) {
+      if (unallocated <= 0) break;
+      const rem = Number(s.remaining_amount) || 0;
+      const toApply = Math.min(unallocated, rem);
+
+      s.paid_amount = Math.round(((Number(s.paid_amount) || 0) + toApply) * 100) / 100;
+      s.remaining_amount = Math.round((rem - toApply) * 100) / 100;
+      unallocated = Math.round((unallocated - toApply) * 100) / 100;
+
+      if (s.remaining_amount <= 0) {
+        s.fully_paid_date = nowStr;
+      }
+    }
+    setLocal(STORAGE_KEYS.SALES, sales);
+
+    const bal = getClientBalance(cId, sales, payments);
 
     return {
       success: true,
